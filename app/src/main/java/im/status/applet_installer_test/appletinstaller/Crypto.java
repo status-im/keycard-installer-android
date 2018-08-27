@@ -1,8 +1,11 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -12,10 +15,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 public class Crypto {
+
+    public static final byte[] NullBytes8 = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
     public static byte[] deriveKey(byte[] cardKey, byte[] seq, byte[] purposeData) {
-        byte[] key24 = new byte[24];
-        System.arraycopy(cardKey, 0, key24, 0, 16);
-        System.arraycopy(cardKey, 0, key24, 16, 8);
+        byte[] key24 = resizeKey24(cardKey);
 
         try {
             byte[] derivationData = new byte[16];
@@ -24,10 +28,10 @@ public class Crypto {
             // 2 bytes sequence counter + 12 bytes 0x00
             System.arraycopy(seq, 0, derivationData, 2, 2);
 
-            Cipher cipher = Cipher.getInstance("DESede/CBC/NoPadding");
-            IvParameterSpec iv = new IvParameterSpec(new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
             SecretKeySpec tmpKey = new SecretKeySpec(key24, "DESede");
-            cipher.init(Cipher.ENCRYPT_MODE, tmpKey, iv);
+
+            Cipher cipher = Cipher.getInstance("DESede/CBC/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, tmpKey, new IvParameterSpec(NullBytes8));
 
             return cipher.doFinal(derivationData);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
@@ -39,11 +43,51 @@ public class Crypto {
 
     public static byte[] appendDESPadding(byte[] data) {
         int length = data.length + 1;
-        for (; length % 8 != 0; length++){}
+        for (; length % 8 != 0; length++){
+        }
         byte[] newData = new byte[length];
         System.arraycopy(data, 0, newData, 0, data.length);
         newData[data.length] = (byte)0x80;
 
         return newData;
+    }
+
+    public static boolean verifyCryptogram(byte[] key, byte[] hostChallenge, byte[] cardChallenge, byte[] cardCryptogram) {
+        byte[] data = new byte[hostChallenge.length + cardChallenge.length];
+        System.arraycopy(hostChallenge, 0, data, 0, hostChallenge.length);
+        System.arraycopy(cardChallenge, 0, data, hostChallenge.length, cardChallenge.length);
+        byte[] paddedData = appendDESPadding(data);
+        byte[] calculated = mac3des(key, paddedData, NullBytes8);
+
+        return Arrays.equals(calculated , cardCryptogram);
+    }
+
+    public static byte[] mac3des(byte[] keyData, byte[] data, byte[] iv) {
+        try {
+            SecretKeySpec key = new SecretKeySpec(resizeKey24(keyData), "DESede");
+            Cipher cipher = Cipher.getInstance("DESede/CBC/NoPadding");
+            cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+            byte[] result = cipher.doFinal(data, 0, 24);
+            byte[] tail = new byte[8];
+            System.arraycopy(result, 16, tail, 0, 8);
+            return tail;
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("error calculating mac.", e);
+        }
+    }
+
+    public static byte[] resizeKey24(byte[] keyData) {
+        byte[] key = new byte[24];
+        System.arraycopy(keyData, 0, key, 0, 16);
+        System.arraycopy(keyData, 0, key, 16, 8);
+
+        return key;
+    }
+
+    public static byte[] resizeKey8(byte[] keyData) {
+        byte[] key = new byte[8];
+        System.arraycopy(keyData, 0, key, 0, 8);
+
+        return key;
     }
 }

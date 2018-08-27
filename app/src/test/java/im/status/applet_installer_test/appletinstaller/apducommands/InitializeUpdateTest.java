@@ -24,14 +24,6 @@ public class InitializeUpdateTest {
     }
 
     @Test
-    public void verifyCryptogram() {
-        byte[] encKey = HexUtils.hexStringToByteArray("A08DF4027BD8ACC9BD89DA2760909D09");
-        byte[] cardCryptogram = HexUtils.hexStringToByteArray("1cd15bd25265c990");
-        byte[] hostChallenge = HexUtils.hexStringToByteArray("13e7a37b30ef2c22");
-        byte[] cardChallenge = HexUtils.hexStringToByteArray("0066ef6b33b04b11");
-    }
-
-    @Test
     public void validateResponse_BadResponse() throws APDUException {
         byte[] apdu = HexUtils.hexStringToByteArray("000002650183039536622002003b5e508f751c0af3016e3fbc23d3a66982");
         APDUResponse resp = new APDUResponse(apdu);

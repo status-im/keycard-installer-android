@@ -31,4 +31,13 @@ public class CryptoTest {
         String expected = "AABB800000000000";
         assertEquals(expected, HexUtils.byteArrayToHexString(result));
     }
+
+    @Test
+    public void verifyCryptogram() {
+        byte[] encKey = HexUtils.hexStringToByteArray("16B5867FF50BE7239C2BF1245B83A362");
+        byte[] hostChallenge = HexUtils.hexStringToByteArray("32da078d7aac1cff");
+        byte[] cardChallenge = HexUtils.hexStringToByteArray("007284f64a7d6465");
+        byte[] cardCryptogram = HexUtils.hexStringToByteArray("05c4bb8a86014e22");
+        assertTrue(Crypto.verifyCryptogram(encKey, hostChallenge, cardChallenge, cardCryptogram));
+    }
 }
