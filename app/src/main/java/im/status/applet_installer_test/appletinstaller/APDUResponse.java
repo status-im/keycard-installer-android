@@ -14,7 +14,6 @@ public class APDUResponse {
     public APDUResponse(byte[] apdu)  {
         if (apdu.length < 2) {
             throw new IllegalArgumentException("APDU response must be at least 2 bytes");
-
         }
         this.apdu = apdu;
         this.parse();

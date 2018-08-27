@@ -36,4 +36,24 @@ public class APDUCommand {
 
         return out.toByteArray();
     }
+
+    public int getCla() {
+        return cla;
+    }
+
+    public int getIns() {
+        return ins;
+    }
+
+    public int getP1() {
+        return p1;
+    }
+
+    public int getP2() {
+        return p2;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
 }
