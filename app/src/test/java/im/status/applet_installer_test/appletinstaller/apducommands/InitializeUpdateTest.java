@@ -24,22 +24,11 @@ public class InitializeUpdateTest {
     }
 
     @Test
-    public void deriveKey() {
-        InitializeUpdate init = new InitializeUpdate(null);
-        byte[] cardKey = HexUtils.hexStringToByteArray("404142434445464748494a4b4c4d4e4f");
-        byte[] seq = HexUtils.hexStringToByteArray("0065");
-
-        byte[] encKey = init.deriveKey(cardKey, seq, InitializeUpdate.DERIVATION_PURPOSE_ENC);
-        String expectedEncKey = "85E72AAF47874218A202BF5EF891DD21";
-        assertEquals(expectedEncKey, HexUtils.byteArrayToHexString(encKey));
-
-        byte[] macKey = init.deriveKey(cardKey, seq, InitializeUpdate.DERIVATION_PURPOSE_MAC);
-        String expectedMacKey = "309CF99E164F3A97F3E5017FF540A79F";
-        assertEquals(expectedMacKey, HexUtils.byteArrayToHexString(macKey));
-
-        byte[] dekKey = init.deriveKey(cardKey, seq, InitializeUpdate.DERIVATION_PURPOSE_DEK);
-        String expectedDekKey = "93D08F8025242C4D775D69B9F16C939B";
-        assertEquals(expectedDekKey, HexUtils.byteArrayToHexString(dekKey));
+    public void verifyCryptogram() {
+        byte[] encKey = HexUtils.hexStringToByteArray("A08DF4027BD8ACC9BD89DA2760909D09");
+        byte[] cardCryptogram = HexUtils.hexStringToByteArray("1cd15bd25265c990");
+        byte[] hostChallenge = HexUtils.hexStringToByteArray("13e7a37b30ef2c22");
+        byte[] cardChallenge = HexUtils.hexStringToByteArray("0066ef6b33b04b11");
     }
 
     @Test
