@@ -40,4 +40,14 @@ public class CryptoTest {
         byte[] cardCryptogram = HexUtils.hexStringToByteArray("05c4bb8a86014e22");
         assertTrue(Crypto.verifyCryptogram(encKey, hostChallenge, cardChallenge, cardCryptogram));
     }
+
+    @Test
+    public void macFull3des() {
+        byte[] key = HexUtils.hexStringToByteArray("5b02e75ad63190aece0622936f11abab");
+        byte[] data = HexUtils.hexStringToByteArray("8482010010810b098a8fbb88da800000");
+        String expected = "5271D7174A5A166A";
+
+        byte[] result = Crypto.macFull3des(key, data, Crypto.NullBytes8);
+        assertEquals(expected, HexUtils.byteArrayToHexString(result));
+    }
 }

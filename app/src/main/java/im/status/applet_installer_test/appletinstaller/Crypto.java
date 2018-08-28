@@ -76,6 +76,31 @@ public class Crypto {
         }
     }
 
+    public static  byte[] macFull3des(byte[] keyData, byte[] data, byte[] iv) {
+        try {
+            SecretKeySpec keyDes = new SecretKeySpec(resizeKey8(keyData), "DES");
+            Cipher cipherDes = Cipher.getInstance("DES/CBC/NoPadding");
+            cipherDes.init(Cipher.ENCRYPT_MODE, keyDes, new IvParameterSpec(iv));
+
+            SecretKeySpec keyDes3 = new SecretKeySpec(resizeKey24(keyData), "DESede");
+            Cipher cipherDes3 = Cipher.getInstance("DESede/CBC/NoPadding");
+            byte[] des3Iv = iv;
+
+            if (data.length > 8) {
+                byte[] tmp = cipherDes.doFinal(data, 0, data.length - 8);
+                System.arraycopy(tmp, tmp.length - 8, des3Iv, 0, 8);
+            }
+
+            cipherDes3.init(Cipher.ENCRYPT_MODE, keyDes3, new IvParameterSpec(des3Iv));
+            byte[] result = cipherDes3.doFinal(data, data.length - 8, 8);
+            byte[] tail = new byte[8];
+            System.arraycopy(result, result.length - 8, tail, 0, 8);
+            return tail;
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("error generating full triple DES MAC.", e);
+        }
+    }
+
     public static byte[] resizeKey24(byte[] keyData) {
         byte[] key = new byte[24];
         System.arraycopy(keyData, 0, key, 0, 16);

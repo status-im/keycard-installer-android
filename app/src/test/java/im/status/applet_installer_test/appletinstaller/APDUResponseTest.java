@@ -2,8 +2,6 @@ package im.status.applet_installer_test.appletinstaller;
 
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 public class APDUResponseTest {
