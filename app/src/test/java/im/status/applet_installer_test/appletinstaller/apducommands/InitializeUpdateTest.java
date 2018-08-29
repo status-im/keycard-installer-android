@@ -2,6 +2,8 @@ package im.status.applet_installer_test.appletinstaller.apducommands;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import im.status.applet_installer_test.appletinstaller.APDUCommand;
 import im.status.applet_installer_test.appletinstaller.APDUException;
 import im.status.applet_installer_test.appletinstaller.APDUResponse;
@@ -11,8 +13,8 @@ import static org.junit.Assert.*;
 
 public class InitializeUpdateTest {
     @Test
-    public void getCommand() {
-        byte[] challenge = InitializeUpdate.generateChallenge();
+    public void getCommand() throws IOException {
+        byte[] challenge = HexUtils.hexStringToByteArray("2d315d5ffc616d10");
         InitializeUpdate init = new InitializeUpdate(challenge);
         APDUCommand cmd = init.getCommand();
 
@@ -21,6 +23,10 @@ public class InitializeUpdateTest {
         assertEquals(0, cmd.getP1());
         assertEquals(0, cmd.getP2());
         assertEquals(challenge, cmd.getData());
+
+        String expectedAPDU = "80500000082D315D5FFC616D1000";
+        byte[] apdu = cmd.serialize();
+        assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
     }
 
     @Test
@@ -32,7 +38,7 @@ public class InitializeUpdateTest {
         InitializeUpdate init = new InitializeUpdate(challenge);
 
         try {
-            init.validateResponse(resp);
+            init.validateResponse(new byte[]{}, resp);
             fail("expected APDUException to be thrown");
         } catch (APDUException e) {
             assertEquals(0x6982, e.sw);
@@ -41,12 +47,14 @@ public class InitializeUpdateTest {
 
     @Test
     public void validateResponse_GoodResponse() throws APDUException {
-        byte[] challenge = HexUtils.hexStringToByteArray("54676ea0043a2f49");
+        byte[] encKey = HexUtils.hexStringToByteArray("16B5867FF50BE7239C2BF1245B83A362");
+
+        byte[] challenge = HexUtils.hexStringToByteArray("f0467f908e5ca23f");
         InitializeUpdate init = new InitializeUpdate(challenge);
 
-        byte[] apdu = HexUtils.hexStringToByteArray("000002650183039536622002003d2310f3cc9e6cca2551458b8bdb6e9000");
+        byte[] apdu = HexUtils.hexStringToByteArray("000002650183039536622002000de9c62ba1c4c8e55fcb91b6654ce49000");
         APDUResponse resp = new APDUResponse(apdu);
 
-        init.validateResponse(resp);
+        init.validateResponse(encKey, resp);
     }
 }

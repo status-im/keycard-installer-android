@@ -76,7 +76,7 @@ public class Crypto {
         }
     }
 
-    public static  byte[] macFull3des(byte[] keyData, byte[] data, byte[] iv) {
+    public static byte[] macFull3des(byte[] keyData, byte[] data, byte[] iv) {
         try {
             SecretKeySpec keyDes = new SecretKeySpec(resizeKey8(keyData), "DES");
             Cipher cipherDes = Cipher.getInstance("DES/CBC/NoPadding");
@@ -84,7 +84,7 @@ public class Crypto {
 
             SecretKeySpec keyDes3 = new SecretKeySpec(resizeKey24(keyData), "DESede");
             Cipher cipherDes3 = Cipher.getInstance("DESede/CBC/NoPadding");
-            byte[] des3Iv = iv;
+            byte[] des3Iv = iv.clone();
 
             if (data.length > 8) {
                 byte[] tmp = cipherDes.doFinal(data, 0, data.length - 8);
