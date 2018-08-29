@@ -10,13 +10,19 @@ public class APDUCommand {
     protected int p2;
     protected int lc;
     protected byte[] data;
+    protected boolean needsLE;
 
     public APDUCommand(int cla, int ins, int p1, int p2, byte[] data) {
+        this(cla, ins, p1, p2, data, false);
+    }
+
+    public APDUCommand(int cla, int ins, int p1, int p2, byte[] data, boolean needsLE) {
         this.cla = cla;
         this.ins = ins;
         this.p1 = p1;
         this.p2 = p2;
         this.data = data;
+        this.needsLE = needsLE;
     }
 
     public byte[] serialize() throws IOException {
@@ -32,7 +38,9 @@ public class APDUCommand {
             out.write(this.data);
         }
 
-        out.write(0); // Response length
+        if (this.needsLE) {
+            out.write(0); // Response length
+        }
 
         return out.toByteArray();
     }

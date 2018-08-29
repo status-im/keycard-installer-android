@@ -1,5 +1,7 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
+import im.status.applet_installer_test.appletinstaller.APDUCommand;
+import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.Crypto;
 
 public class ExternalAuthenticate {
@@ -18,6 +20,10 @@ public class ExternalAuthenticate {
         this.hostChallenge = hostChallenge;
     }
 
+    public APDUCommand getCommand() {
+        return new APDUCommand(CLA, INS, P1, P2, this.getHostCryptogram());
+    }
+
     public byte[] getHostCryptogram() {
         byte[] data = new byte[this.cardChallenge.length + this.hostChallenge.length];
         System.arraycopy(cardChallenge, 0, data, 0, cardChallenge.length);
@@ -25,5 +31,9 @@ public class ExternalAuthenticate {
         byte[] paddedData = Crypto.appendDESPadding(data);
 
         return Crypto.mac3des(this.encKeyData, paddedData, Crypto.NullBytes8);
+    }
+
+    public boolean checkResponse(APDUResponse resp) {
+        return resp.getSw() == APDUResponse.SW_OK;
     }
 }

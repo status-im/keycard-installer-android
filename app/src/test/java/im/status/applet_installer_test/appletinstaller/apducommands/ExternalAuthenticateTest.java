@@ -2,6 +2,8 @@ package im.status.applet_installer_test.appletinstaller.apducommands;
 
 import org.junit.Test;
 
+import java.io.IOException;
+
 import im.status.applet_installer_test.appletinstaller.HexUtils;
 
 import static org.junit.Assert.*;
@@ -18,6 +20,19 @@ public class ExternalAuthenticateTest {
         String expectedHostCryptogram = "45A5F48DAE68203C";
         byte[] hostCryptogram = auth.getHostCryptogram();
         assertEquals(expectedHostCryptogram, HexUtils.byteArrayToHexString(hostCryptogram));
+    }
+
+    @Test
+    public void getCommand() throws IOException {
+        byte[] encKeyData = HexUtils.hexStringToByteArray("B587BB999A67AB99F5222D07EBB061EE");
+        byte[] cardChallenge = HexUtils.hexStringToByteArray("00819711736d57f0");
+        byte[] hostChallenge = HexUtils.hexStringToByteArray("796007fae07336b4");
+
+        ExternalAuthenticate auth = new ExternalAuthenticate(encKeyData, cardChallenge, hostChallenge);
+
+        String expectedAPDU = "84820100086EFBCD81821F267B";
+        byte[] apdu = auth.getCommand().serialize();
+        assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
     }
 }
 

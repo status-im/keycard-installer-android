@@ -8,10 +8,10 @@ import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.HexUtils;
 
 public class InitializeUpdate {
-    public static int CLA = 0x80;
-    public static int INS = 0x50;
-    public static int P1 = 0;
-    public static int P2 = 0;
+    public static final int CLA = 0x80;
+    public static final int INS = 0x50;
+    public static final int P1 = 0;
+    public static final int P2 = 0;
 
     public static byte[] DERIVATION_PURPOSE_ENC = new byte[]{(byte) 0x01, (byte) 0x82};
     public static byte[] DERIVATION_PURPOSE_MAC = new byte[]{(byte) 0x01, (byte) 0x01};
@@ -56,15 +56,15 @@ public class InitializeUpdate {
         byte[] cardChallenge = new byte[8];
         System.arraycopy(data, 12, cardChallenge, 0, 8);
 
-        byte[] ssc = new byte[2];
-        System.arraycopy(data, 12, ssc, 0, 2);
+        byte[] seq = new byte[2];
+        System.arraycopy(data, 12, seq, 0, 2);
 
         byte[] cardCryptogram = new byte[8];
         System.arraycopy(data, 20, cardCryptogram, 0, 8);
 
         System.out.printf("diversification: %s, %n", HexUtils.byteArrayToHexString(diversificationdData));
         System.out.printf("cardChallege: %s, %n", HexUtils.byteArrayToHexString(cardChallenge));
-        System.out.printf("ssc: %s, %n", HexUtils.byteArrayToHexString(ssc));
+        System.out.printf("ssc: %s, %n", HexUtils.byteArrayToHexString(seq));
         System.out.printf("cardCryptogram: %s, %n", HexUtils.byteArrayToHexString(cardCryptogram));
 
 
