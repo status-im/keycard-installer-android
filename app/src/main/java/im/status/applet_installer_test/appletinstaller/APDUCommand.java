@@ -64,4 +64,8 @@ public class APDUCommand {
     public byte[] getData() {
         return data;
     }
+
+    public boolean getNeedsLE() {
+        return this.needsLE;
+    }
 }

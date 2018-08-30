@@ -9,6 +9,7 @@ import im.status.applet_installer_test.appletinstaller.Crypto;
 import im.status.applet_installer_test.appletinstaller.HexUtils;
 import im.status.applet_installer_test.appletinstaller.Keys;
 import im.status.applet_installer_test.appletinstaller.Logger;
+import im.status.applet_installer_test.appletinstaller.Session;
 
 public class InitializeUpdate {
     public static final int CLA = 0x80;
@@ -38,7 +39,7 @@ public class InitializeUpdate {
         return challenge;
     }
 
-    public Keys verifyResponse(Keys cardKeys, APDUResponse resp) throws APDUException {
+    public Session verifyResponse(Keys cardKeys, APDUResponse resp) throws APDUException {
         if (resp.getSw() == APDUResponse.SW_SECURITY_CONDITION_NOT_SATISFIED) {
             throw new APDUException(resp.getSw(), "security confition not satisfied");
         }
@@ -67,9 +68,11 @@ public class InitializeUpdate {
 
         Keys sessionKeys = new Keys(sessionEncKey, sessionMacKey);
 
-        boolean x = Crypto.verifyCryptogram(sessionKeys.getEncKeyData(), this.hostChallenge, cardChallenge, cardCryptogram);
-        Logger.log("VERIFIED: " + x);
+        boolean verified = Crypto.verifyCryptogram(sessionKeys.getEncKeyData(), this.hostChallenge, cardChallenge, cardCryptogram);
+        if (!verified) {
+            throw new APDUException("error verifying card cryptogram.");
+        }
 
-        return sessionKeys;
+        return new Session(sessionKeys, cardChallenge);
     }
 }

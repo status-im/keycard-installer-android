@@ -7,4 +7,9 @@ public class APDUException extends Exception {
         super(message + ", 0x" + String.format("0x%04X", sw));
         this.sw = sw;
     }
+
+    public APDUException(String message) {
+        super(message);
+        this.sw = 0;
+    }
 }

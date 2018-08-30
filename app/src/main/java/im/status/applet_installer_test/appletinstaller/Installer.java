@@ -3,7 +3,9 @@ package im.status.applet_installer_test.appletinstaller;
 import java.io.IOException;
 import java.security.SecureRandom;
 
+import im.status.applet_installer_test.appletinstaller.apducommands.ExternalAuthenticate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
+import im.status.applet_installer_test.appletinstaller.apducommands.Status;
 
 public class Installer {
     private Channel channel;
@@ -18,19 +20,22 @@ public class Installer {
     }
 
     public void start() throws IOException, APDUException {
-        SecureRandom random = new SecureRandom();
-        byte hostChallenge[] = new byte[8];
-        random.nextBytes(hostChallenge);
+        byte[] hostChallenge = InitializeUpdate.generateChallenge();
         InitializeUpdate init = new InitializeUpdate(hostChallenge);
-        byte[] data = init.getCommand().serialize();
+        APDUResponse resp = this.channel.send(init.getCommand());
 
-        // get data
-        //byte[] data = new byte[]{(byte) 0x80, (byte) 0xCA, 0x00, (byte) 0x66};
+        Session session = init.verifyResponse(this.cardKeys, resp);
+        Keys sessionKeys = session.getKeys();
 
-        byte[] respData = this.channel.transceive(data);
-        APDUResponse resp = new APDUResponse(respData);
-        Logger.log(respData);
+        this.channel = new SecureChannel(this.channel, sessionKeys);
 
-        Keys keys = init.verifyResponse(this.cardKeys, resp);
+        ExternalAuthenticate auth = new ExternalAuthenticate(sessionKeys.getEncKeyData(), session.getCardChallenge(), hostChallenge);
+        resp = this.channel.send(auth.getCommand());
+        if (!auth.checkResponse(resp)) {
+            throw new APDUException(resp.getSw(), "bad external authenticate response");
+        }
+
+        Status status = new Status(Status.P1_EXECUTABLE_LOAD_FILES_AND_MODULES);
+        resp = this.channel.send(status.getCommand());
     }
 }

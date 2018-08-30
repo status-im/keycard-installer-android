@@ -24,13 +24,13 @@ public class ExternalAuthenticateTest {
 
     @Test
     public void getCommand() throws IOException {
-        byte[] encKeyData = HexUtils.hexStringToByteArray("B587BB999A67AB99F5222D07EBB061EE");
-        byte[] cardChallenge = HexUtils.hexStringToByteArray("00819711736d57f0");
-        byte[] hostChallenge = HexUtils.hexStringToByteArray("796007fae07336b4");
+        byte[] encKeyData = HexUtils.hexStringToByteArray("8D289AFE0AB9C45B1C76DEEA182966F4");
+        byte[] cardChallenge = HexUtils.hexStringToByteArray("000f3fd65d4d6e45");
+        byte[] hostChallenge = HexUtils.hexStringToByteArray("cf307b6719bf224d");
 
         ExternalAuthenticate auth = new ExternalAuthenticate(encKeyData, cardChallenge, hostChallenge);
 
-        String expectedAPDU = "84820100086EFBCD81821F267B";
+        String expectedAPDU = "84820100087702AC6CE46A47F0";
         byte[] apdu = auth.getCommand().serialize();
         assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
     }

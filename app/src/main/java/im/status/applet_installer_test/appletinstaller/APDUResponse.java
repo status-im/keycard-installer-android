@@ -49,4 +49,8 @@ public class APDUResponse {
     public int getSw2() {
         return this.sw2;
     }
+
+    public byte[] getBytes() {
+        return this.apdu;
+    }
 }

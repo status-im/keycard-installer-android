@@ -114,4 +114,15 @@ public class Crypto {
 
         return key;
     }
+
+    public static byte[] encryptICV(byte[] macKeyData, byte[] mac) {
+        try {
+            Cipher cipher = Cipher.getInstance("DES/ECB/NoPadding");
+            SecretKeySpec key = new SecretKeySpec(resizeKey8(macKeyData), "DES");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            return cipher.doFinal(mac);
+        } catch (GeneralSecurityException e) {
+            throw new RuntimeException("error generating ICV.", e);
+        }
+    }
 }

@@ -13,10 +13,11 @@ public class CardChannel implements Channel {
         this.isoDep = isoDep;
     }
 
-    public byte[] transceive(byte[] data) throws IOException {
-        Logger.log(String.format("COMMAND %s %n", HexUtils.byteArrayToHexString(data)));
-        byte[] resp = this.isoDep.transceive(data);
+    public APDUResponse send(APDUCommand cmd) throws IOException {
+        byte[] apdu = cmd.serialize();
+        Logger.log(String.format("COMMAND  %s %n", HexUtils.byteArrayToHexString(apdu)));
+        byte[] resp = this.isoDep.transceive(apdu);
         Logger.log(String.format("RESPONSE %s %n", HexUtils.byteArrayToHexString(resp)));
-        return resp;
+        return new APDUResponse(resp);
     }
 }
