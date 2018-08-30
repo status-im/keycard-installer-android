@@ -15,7 +15,6 @@ import javax.crypto.spec.SecretKeySpec;
 
 
 public class Crypto {
-
     public static final byte[] NullBytes8 = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     public static byte[] deriveKey(byte[] cardKey, byte[] seq, byte[] purposeData) {

@@ -7,6 +7,8 @@ import im.status.applet_installer_test.appletinstaller.APDUException;
 import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.Crypto;
 import im.status.applet_installer_test.appletinstaller.HexUtils;
+import im.status.applet_installer_test.appletinstaller.Keys;
+import im.status.applet_installer_test.appletinstaller.Logger;
 
 public class InitializeUpdate {
     public static final int CLA = 0x80;
@@ -36,7 +38,7 @@ public class InitializeUpdate {
         return challenge;
     }
 
-    public boolean validateResponse(byte[] encKeyData, APDUResponse resp) throws APDUException {
+    public Keys verifyResponse(Keys cardKeys, APDUResponse resp) throws APDUException {
         if (resp.getSw() == APDUResponse.SW_SECURITY_CONDITION_NOT_SATISFIED) {
             throw new APDUException(resp.getSw(), "security confition not satisfied");
         }
@@ -57,9 +59,17 @@ public class InitializeUpdate {
         byte[] cardCryptogram = new byte[8];
         System.arraycopy(data, 20, cardCryptogram, 0, 8);
 
-        return Crypto.verifyCryptogram(encKeyData, this.hostChallenge, cardChallenge, cardCryptogram);
+        byte[] seq = new byte[2];
+        System.arraycopy(data, 12, seq, 0, 2);
 
-        //System.out.printf("key data: %s, %n", HexUtils.byteArrayToHexString(keyData));
+        byte[] sessionEncKey = Crypto.deriveKey(cardKeys.getEncKeyData(), seq, DERIVATION_PURPOSE_ENC);
+        byte[] sessionMacKey = Crypto.deriveKey(cardKeys.getMacKeyData(), seq, DERIVATION_PURPOSE_MAC);
 
+        Keys sessionKeys = new Keys(sessionEncKey, sessionMacKey);
+
+        boolean x = Crypto.verifyCryptogram(sessionKeys.getEncKeyData(), this.hostChallenge, cardChallenge, cardCryptogram);
+        Logger.log("VERIFIED: " + x);
+
+        return sessionKeys;
     }
 }
