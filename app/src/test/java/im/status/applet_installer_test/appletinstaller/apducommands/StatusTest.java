@@ -17,17 +17,5 @@ public class StatusTest {
         String expectedAPDU = "80F28002024F0000";
         byte[] apdu = status.getCommand().serialize();
         assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
-
-        APDUWrapper wrapper = new APDUWrapper(HexUtils.hexStringToByteArray("34211B65F5A563C077EC5384876DC809"));
-        APDUCommand wrappedCommand = wrapper.wrap(status.getCommand());
-
-        //expectedAPDU = "84F280020A4F0071BF1479317EDB4700";
-        //apdu = wrappedCommand.serialize();
-        //assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
-
-
-        //expectedAPDU = "84F280020A4F0071BF1479317EDB4700";
-        //apdu = wrappedCommand.serialize();
-        //assertEquals(expectedAPDU, HexUtils.byteArrayToHexString(apdu));
     }
 }
