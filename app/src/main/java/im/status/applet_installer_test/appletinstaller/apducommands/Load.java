@@ -18,7 +18,8 @@ public class Load {
     public static final int CLA = 0x80;
     public static final int INS = 0xE8;
 
-    private static String[] fileNames = {"Header", "Directory", "Import", "Applet", "Class", "Method", "StaticField", "Export", "ConstantPool", "RefLocation"};
+    private static String[] fileNames = {"Header", "Directory", "Import", "Applet",
+            "Class", "Method", "StaticField", "Export", "ConstantPool", "RefLocation"};
 
     private String path;
     private int offset;
@@ -74,14 +75,6 @@ public class Load {
         int size = rangeEnd - offset;
         byte[] data = new byte[size];
         System.arraycopy(this.fullData, this.offset, data, 0, size);
-
-        if (this.count == 30) {
-            System.out.printf("-- OFFSET %d %n", this.offset);
-            System.out.printf("-- FULL LENGTH %d %n", this.fullData.length);
-            System.out.printf("-- RANGE END %d %n", rangeEnd);
-            System.out.printf("-- SIZE %d %n", size);
-        }
-
 
         boolean isLast = this.offset + size >= this.fullData.length;
         int p1 = isLast ? 0x80 : 0;
