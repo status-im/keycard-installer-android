@@ -4,6 +4,7 @@ public class APDUResponse {
     public static int SW_OK = 0x9000;
     public static int SW_SECURITY_CONDITION_NOT_SATISFIED = 0x6982;
     public static int SW_AUTHENTICATION_METHOD_BLOCKED = 0x6983;
+    public static int SW_CARD_LOCKED = 0x6283;
 
     private byte[] apdu;
     private byte[] data;
