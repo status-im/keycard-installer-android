@@ -31,12 +31,8 @@ public class APDUCommand {
         out.write(this.ins);
         out.write(this.p1);
         out.write(this.p2);
-
-        int lc = this.data.length;
-        if (lc > 0) {
-            out.write(lc);
-            out.write(this.data);
-        }
+        out.write(this.data.length);
+        out.write(this.data);
 
         if (this.needsLE) {
             out.write(0); // Response length

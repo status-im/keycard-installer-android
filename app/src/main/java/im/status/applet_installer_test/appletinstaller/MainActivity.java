@@ -1,5 +1,6 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
@@ -11,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.net.URL;
 import java.security.SecureRandom;
 
 public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
@@ -35,24 +37,36 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 disableInstallButton();
                 try {
                     install();
-                } catch (Exception e) {
-                    Logger.log(e.getMessage());
+                } catch (APDUException e) {
+                    logException(e);
+                } catch (IOException e) {
+                    logException(e);
                 }
             }
         });
     }
 
-    public void install() throws Exception {
-        if (installationAttempted) {
-            throw new Exception("installation already attempted");
+    private void logException(Exception e) {
+        String msg = e.getMessage();
+        if (msg == null) {
+            msg = "exception without message";
         }
+
+        Logger.log("exception: " + msg);
+    }
+
+    public void install() throws IOException, APDUException {
+        //if (installationAttempted) {
+        //    throw new APDUException("installation already attempted");
+        //}
 
         installationAttempted = true;
 
-        Logger.log("installing");
         CardManager cm = new CardManager(tag);
         cm.connect();
-        cm.install();
+
+        AssetManager assets = this.getAssets();
+        cm.install(assets, "wallet.cap");
     }
 
     @Override

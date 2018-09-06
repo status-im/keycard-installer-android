@@ -26,19 +26,18 @@ public class Load {
     private int count;
     private byte[] fullData;
 
-    public Load(String path) throws FileNotFoundException, IOException {
+    public Load(InputStream in) throws FileNotFoundException, IOException {
         this.path = path;
         this.offset = 0;
         this.count = 0;
-        Map<String, byte[]> files = this.loadFiles(this.path);
+        Map<String, byte[]> files = this.loadFiles(in);
+        in.close();
         this.fullData = this.getCode(files);
     }
 
-    public Map<String, byte[]> loadFiles(String path) throws IOException {
+    public Map<String, byte[]> loadFiles(InputStream in) throws IOException {
         Map<String, byte[]> files = new LinkedHashMap<>();
-        InputStream in = new FileInputStream(this.path);
         ZipInputStream zip = new ZipInputStream(in);
-
         ZipEntry entry = zip.getNextEntry();
 
         while(entry != null) {
@@ -128,5 +127,9 @@ public class Load {
         System.arraycopy(data, 0, fullData, 1 + encodedFullLength.length, data.length);
 
         return fullData;
+    }
+
+    public int getCount() {
+        return count;
     }
 }

@@ -4,10 +4,12 @@ import android.util.Log;
 
 public class Logger {
     public static void log(String m) {
-        Log.d("installer-debug", m);
+        if (m != null) {
+            Log.d("installer-debug", m);
+        }
     }
 
     public static void log(byte[] m) {
-        Log.d("installer-debug", HexUtils.byteArrayToHexString(m));
+        log(HexUtils.byteArrayToHexString(m));
     }
 }
