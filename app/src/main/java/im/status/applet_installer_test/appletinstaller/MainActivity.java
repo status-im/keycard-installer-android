@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.net.URL;
 import java.security.SecureRandom;
 
-public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
+public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback, LogListener {
 
     private NfcAdapter nfcAdapter;
     private TextView textView;
@@ -28,7 +29,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        Logger.setListener(this);
         textView = (TextView) findViewById(R.id.textView);
+        textView.setMovementMethod(new ScrollingMovementMethod());
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
         buttonInstall.setEnabled(false);
         buttonInstall.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     private void start(Tag tag) throws IOException {
         this.tag = tag;
-        Logger.log("tag found");
+        Logger.log("--------------------------\ntag found");
         this.enableInstallButton();
     }
 
@@ -122,6 +125,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             @Override
             public void run() {
                 buttonInstall.setEnabled(false);
+            }
+        });
+    }
+
+    public void log(final String s) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textView.append(s + "\n");
             }
         });
     }
