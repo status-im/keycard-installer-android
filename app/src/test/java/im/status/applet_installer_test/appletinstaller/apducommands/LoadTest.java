@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 public class LoadTest {
 
     @Test
-    public void getCode() throws IOException {
+    public void getCommand() throws IOException {
         URL url = this.getClass().getClassLoader().getResource("wallet.cap");
         Load load = new Load(url.getPath());
 

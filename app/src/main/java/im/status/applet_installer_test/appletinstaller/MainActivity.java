@@ -1,16 +1,24 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
+import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import java.io.IOException;
 import java.security.Security;
 
-public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
+import java.io.ByteArrayOutputStream;
+import java.net.URL;
+import java.security.SecureRandom;
+
+public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback, LogListener {
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
@@ -27,7 +35,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        Logger.setListener(this);
         textView = (TextView) findViewById(R.id.textView);
+        textView.setMovementMethod(new ScrollingMovementMethod());
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
         buttonInstall.setEnabled(false);
         buttonInstall.setOnClickListener(new View.OnClickListener() {
@@ -36,8 +46,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
                 disableButtons();
                 try {
                     install();
-                } catch (Exception e) {
-                    Logger.log(e.getMessage());
+                } catch (APDUException e) {
+                    logException(e);
+                } catch (IOException e) {
+                    logException(e);
                 }
             }
         });
@@ -56,17 +68,27 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         });
     }
 
-    public void install() throws Exception {
-        if (installationAttempted) {
-            throw new Exception("installation already attempted");
+    private void logException(Exception e) {
+        String msg = e.getMessage();
+        if (msg == null) {
+            msg = "exception without message";
         }
+
+        Logger.log("exception: " + msg);
+    }
+
+    public void install() throws IOException, APDUException {
+        //if (installationAttempted) {
+        //    throw new APDUException("installation already attempted");
+        //}
 
         installationAttempted = true;
 
-        Logger.log("installing");
         CardManager cm = new CardManager(tag);
         cm.connect();
-        cm.install();
+
+        AssetManager assets = this.getAssets();
+        cm.install(assets, "wallet.cap");
     }
 
     public void perfTest() throws Exception {
@@ -111,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     private void start(Tag tag) throws IOException {
         this.tag = tag;
-        Logger.log("tag found");
+        Logger.log("--------------------------\ntag found");
         this.enableButtons();
     }
 
@@ -131,6 +153,15 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             public void run() {
                 buttonInstall.setEnabled(false);
                 buttonPerfTest.setEnabled(false);
+            }
+        });
+    }
+
+    public void log(final String s) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textView.append(s + "\n");
             }
         });
     }
