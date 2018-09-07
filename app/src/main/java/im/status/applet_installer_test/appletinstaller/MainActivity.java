@@ -4,20 +4,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.security.SecureRandom;
+import java.security.Security;
 
 public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback {
+    static {
+        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+    }
 
     private NfcAdapter nfcAdapter;
     private TextView textView;
     private Button buttonInstall;
+    private Button buttonPerfTest;
     private Tag tag;
     private boolean installationAttempted;
 
@@ -32,9 +33,22 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                disableInstallButton();
+                disableButtons();
                 try {
                     install();
+                } catch (Exception e) {
+                    Logger.log(e.getMessage());
+                }
+            }
+        });
+        buttonPerfTest = (Button) findViewById(R.id.buttonPerfTest);
+        buttonPerfTest.setEnabled(false);
+        buttonPerfTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                disableButtons();
+                try {
+                    perfTest();
                 } catch (Exception e) {
                     Logger.log(e.getMessage());
                 }
@@ -53,6 +67,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         CardManager cm = new CardManager(tag);
         cm.connect();
         cm.install();
+    }
+
+    public void perfTest() throws Exception {
+
     }
 
     @Override
@@ -75,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     @Override
-    public void onTagDiscovered (Tag tag) {
+    public void onTagDiscovered(Tag tag) {
         try {
             start(tag);
         } catch (final IOException e) {
@@ -91,23 +109,25 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private void start(Tag tag) throws IOException {
         this.tag = tag;
         Logger.log("tag found");
-        this.enableInstallButton();
+        this.enableButtons();
     }
 
-    public void enableInstallButton() {
+    public void enableButtons() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 buttonInstall.setEnabled(true);
+                buttonPerfTest.setEnabled(true);
             }
         });
     }
 
-    public void disableInstallButton() {
+    public void disableButtons() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 buttonInstall.setEnabled(false);
+                buttonPerfTest.setEnabled(false);
             }
         });
     }

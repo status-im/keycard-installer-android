@@ -20,11 +20,23 @@
         app:layout_constraintVertical_bias="0.014" />
 
     <Button
-        android:id="@+id/buttonInstall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="install"
-        tools:layout_editor_absoluteX="148dp"
-        tools:layout_editor_absoluteY="446dp" />
+            android:id="@+id/buttonInstall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="install"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/buttonPerfTest"
+            android:layout_marginEnd="8dp" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/textView" app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp" app:layout_constraintHorizontal_bias="0.292"
+            app:layout_constraintVertical_bias="0.512"/>
+    <Button
+            android:text="PerfTest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/buttonPerfTest" app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="52dp"
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/textView"
+            app:layout_constraintVertical_bias="0.512"/>
 
 </android.support.constraint.ConstraintLayout>
