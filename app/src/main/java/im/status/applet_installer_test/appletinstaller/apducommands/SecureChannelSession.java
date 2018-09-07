@@ -299,7 +299,7 @@ public class SecureChannelSession {
    * @return the raw card response
    * @throws IOException communication error
    */
-  public void unpairOthers(CardChannel apduChannel) throws IOException {
+  public void unpairOthers(CardChannel apduChannel) throws IOException, APDUException {
     for (int i = 0; i < PAIRING_MAX_CLIENT_COUNT; i++) {
       if (i != pairingIndex) {
         APDUCommand openSecureChannel = protectedCommand(0x80, INS_UNPAIR, i, 0, new byte[0]);

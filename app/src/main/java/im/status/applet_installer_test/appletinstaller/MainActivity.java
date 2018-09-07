@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     private Button buttonPerfTest;
     private Tag tag;
     private boolean installationAttempted;
+    private TagManager tagManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +37,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         setContentView(R.layout.activity_main);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         Logger.setListener(this);
+        this.tagManager = new TagManager(nfcAdapter);
+        this.tagManager.start();
         textView = (TextView) findViewById(R.id.textView);
         textView.setMovementMethod(new ScrollingMovementMethod());
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
@@ -102,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     public void onResume() {
         super.onResume();
         if (nfcAdapter != null) {
-            nfcAdapter.enableReaderMode(this, this,
+            nfcAdapter.enableReaderMode(this, this.tagManager,
                     NfcAdapter.FLAG_READER_NFC_A |
                             NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
                     null);
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     @Override
     public void onTagDiscovered(Tag tag) {
+        Logger.log("tag found");
         try {
             start(tag);
         } catch (final IOException e) {
@@ -133,7 +137,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
 
     private void start(Tag tag) throws IOException {
         this.tag = tag;
-        Logger.log("--------------------------\ntag found");
         this.enableButtons();
     }
 

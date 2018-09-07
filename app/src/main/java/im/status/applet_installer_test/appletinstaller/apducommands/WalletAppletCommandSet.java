@@ -1,6 +1,7 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
 import im.status.applet_installer_test.appletinstaller.APDUCommand;
+import im.status.applet_installer_test.appletinstaller.APDUException;
 import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.CardChannel;
 import org.spongycastle.jce.interfaces.ECPrivateKey;
@@ -143,7 +144,7 @@ public class WalletAppletCommandSet {
   /**
    * Unpair all other clients.
    */
-  public void unpairOthers() throws IOException {
+  public void unpairOthers() throws IOException, APDUException {
     secureChannel.unpairOthers(apduChannel);
   }
 

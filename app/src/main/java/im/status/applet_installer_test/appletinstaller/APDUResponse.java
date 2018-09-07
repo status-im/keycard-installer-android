@@ -39,7 +39,7 @@ public class APDUResponse {
 
     public APDUResponse checkOK() throws APDUException {
         if (!isOK()) {
-            throw new APDUException("Unexpected error SW");
+            throw new APDUException(this.getSw(),  "Unexpected error SW");
         }
 
         return this;
