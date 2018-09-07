@@ -37,9 +37,9 @@ public class APDUResponse {
         return this.sw == SW_OK;
     }
 
-    public APDUResponse checkOK() throws IOException {
+    public APDUResponse checkOK() throws APDUException {
         if (!isOK()) {
-            throw new IOException("Unexpected error SW");
+            throw new APDUException("Unexpected error SW");
         }
 
         return this;
