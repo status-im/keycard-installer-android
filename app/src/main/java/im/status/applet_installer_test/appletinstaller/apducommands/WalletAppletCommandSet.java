@@ -141,6 +141,13 @@ public class WalletAppletCommandSet {
   }
 
   /**
+   * Unpair all other clients.
+   */
+  public void unpairOthers() throws IOException {
+    secureChannel.unpairOthers(apduChannel);
+  }
+
+  /**
    * Sends a GET STATUS APDU. The info byte is the P1 parameter of the command, valid constants are defined in the applet
    * class itself.
    *

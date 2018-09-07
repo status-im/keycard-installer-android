@@ -1,8 +1,6 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.APDUResponse;
-import im.status.applet_installer_test.appletinstaller.CardChannel;
+import im.status.applet_installer_test.appletinstaller.*;
 import org.spongycastle.crypto.engines.AESEngine;
 import org.spongycastle.crypto.macs.CBCBlockCipherMac;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -37,6 +35,9 @@ public class SecureChannelSession {
   
   public static final int PAYLOAD_MAX_SIZE = 223;
 
+  static final byte PAIRING_MAX_CLIENT_COUNT = 5;
+
+
   private byte[] secret;
   private byte[] publicKey;
   private byte[] pairingKey;
@@ -59,17 +60,17 @@ public class SecureChannelSession {
     try {
       random = new SecureRandom();
       ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
-      KeyPairGenerator g = KeyPairGenerator.getInstance("ECDH", "BC");
+      KeyPairGenerator g = KeyPairGenerator.getInstance("ECDH");
       g.initialize(ecSpec, random);
 
       KeyPair keyPair = g.generateKeyPair();
 
       publicKey = ((ECPublicKey) keyPair.getPublic()).getQ().getEncoded(false);
-      KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH", "BC");
+      KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
       keyAgreement.init(keyPair.getPrivate());
 
       ECPublicKeySpec cardKeySpec = new ECPublicKeySpec(ecSpec.getCurve().decodePoint(keyData), ecSpec);
-      ECPublicKey cardKey = (ECPublicKey) KeyFactory.getInstance("ECDSA", "BC").generatePublic(cardKeySpec);
+      ECPublicKey cardKey = (ECPublicKey) KeyFactory.getInstance("ECDSA").generatePublic(cardKeySpec);
 
       keyAgreement.doPhase(cardKey, true);
       secret = keyAgreement.generateSecret();
@@ -131,7 +132,7 @@ public class SecureChannelSession {
    */
   public void processOpenSecureChannelResponse(APDUResponse response) {
     try {
-      MessageDigest md = MessageDigest.getInstance("SHA512", "BC");
+      MessageDigest md = MessageDigest.getInstance("SHA512");
       md.update(secret);
       md.update(pairingKey);
       byte[] data = response.getData();
@@ -140,7 +141,7 @@ public class SecureChannelSession {
 
       sessionEncKey = new SecretKeySpec(Arrays.copyOf(keyData, SC_SECRET_LENGTH), "AES");
       sessionMacKey = new KeyParameter(keyData, SC_SECRET_LENGTH, SC_SECRET_LENGTH);
-      sessionCipher = Cipher.getInstance("AES/CBC/ISO7816-4Padding", "BC");
+      sessionCipher = Cipher.getInstance("AES/CBC/ISO7816-4Padding");
       sessionMac = new CBCBlockCipherMac(new AESEngine(), 128, null);
       open = true;
     } catch(Exception e) {
@@ -181,7 +182,7 @@ public class SecureChannelSession {
     MessageDigest md;
 
     try {
-      md = MessageDigest.getInstance("SHA256", "BC");
+      md = MessageDigest.getInstance("SHA256");
     } catch(Exception e) {
       throw new RuntimeException("Is BouncyCastle in the classpath?", e);
     }
@@ -289,6 +290,22 @@ public class SecureChannelSession {
   public APDUResponse unpair(CardChannel apduChannel, byte p1) throws IOException {
     APDUCommand openSecureChannel = protectedCommand(0x80, INS_UNPAIR, p1, 0, new byte[0]);
     return transmit(apduChannel, openSecureChannel);
+  }
+
+  /**
+   * Unpair all other clients
+   *
+   * @param apduChannel the apdu channel
+   * @return the raw card response
+   * @throws IOException communication error
+   */
+  public void unpairOthers(CardChannel apduChannel) throws IOException {
+    for (int i = 0; i < PAIRING_MAX_CLIENT_COUNT; i++) {
+      if (i != pairingIndex) {
+        APDUCommand openSecureChannel = protectedCommand(0x80, INS_UNPAIR, i, 0, new byte[0]);
+        transmit(apduChannel, openSecureChannel).checkOK();
+      }
+    }
   }
 
   /**

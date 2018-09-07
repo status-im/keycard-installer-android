@@ -1,5 +1,7 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import java.io.IOException;
+
 public class APDUResponse {
     public static int SW_OK = 0x9000;
     public static int SW_SECURITY_CONDITION_NOT_SATISFIED = 0x6982;
@@ -33,6 +35,14 @@ public class APDUResponse {
 
     public boolean isOK() {
         return this.sw == SW_OK;
+    }
+
+    public APDUResponse checkOK() throws IOException {
+        if (!isOK()) {
+            throw new IOException("Unexpected error SW");
+        }
+
+        return this;
     }
 
     public byte[] getData() {

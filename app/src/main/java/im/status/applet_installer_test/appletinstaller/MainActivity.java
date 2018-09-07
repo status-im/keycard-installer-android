@@ -70,7 +70,10 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     public void perfTest() throws Exception {
-
+        Logger.log("Starting performance tests");
+        PerfTest pf = new PerfTest(tag);
+        pf.connect();
+        pf.test();
     }
 
     @Override
