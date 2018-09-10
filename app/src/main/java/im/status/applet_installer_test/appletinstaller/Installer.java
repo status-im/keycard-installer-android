@@ -60,8 +60,10 @@ public class Installer {
 
         byte[] aid = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
 
-        Delete delete = new Delete(aid);
-        this.channel.send(delete.getCommand());
+        //Delete delete = new Delete(aid);
+        //Logger.log("sending command delete");
+        //this.channel.send(delete.getCommand());
+
 
         InstallForLoad preLoad = new InstallForLoad(aid, sdaid);
         this.send("install for load", preLoad.getCommand());
@@ -92,6 +94,12 @@ public class Installer {
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {
         Logger.log("sending command " + description);
         APDUResponse resp = this.channel.send(cmd);
+
+        if(resp.getSw() == APDUResponse.SW_SECURITY_CONDITION_NOT_SATISFIED) {
+            Logger.log("SW_SECURITY_CONDITION_NOT_SATISFIED: card might be blocked");
+            throw new APDUException(resp.getSw(), "security confition not satisfied. card might be blocked " + description);
+        }
+
         if (!resp.isOK()) {
             throw new APDUException(resp.getSw(), "bad response for command " + description);
         }

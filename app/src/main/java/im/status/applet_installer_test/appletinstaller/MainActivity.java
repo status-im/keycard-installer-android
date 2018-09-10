@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
 
     public void install() throws IOException, APDUException {
         if (this.cardManager != null) {
+            clearTextView();
             this.cardManager.startInstallation();
         }
     }
@@ -146,6 +147,15 @@ public class MainActivity extends AppCompatActivity implements UILogger {
                 textView.append(s + "\n");
                 //textViewScroll.fullScroll(ScrollView.FOCUS_DOWN);
                 textViewScroll.scrollTo(0, textView.getBottom());
+            }
+        });
+    }
+
+    public void clearTextView() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                textView.setText("");
             }
         });
     }
