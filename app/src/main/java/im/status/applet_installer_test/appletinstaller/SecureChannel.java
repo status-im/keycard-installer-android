@@ -14,9 +14,9 @@ public class SecureChannel implements Channel {
     }
 
     public APDUResponse send(APDUCommand cmd) throws IOException {
-        Logger.log(String.format("WRAPPING %s %n", HexUtils.byteArrayToHexString(cmd.serialize())));
+        Logger.log(String.format("WRAPPING %s %n", HexUtils.byteArrayToHexString(cmd.serialize())), false);
         APDUCommand wrappedCommand = this.wrapper.wrap(cmd);
-        Logger.log(String.format("WRAPPED  %s %n", HexUtils.byteArrayToHexString(wrappedCommand.serialize())));
+        Logger.log(String.format("WRAPPED  %s %n", HexUtils.byteArrayToHexString(wrappedCommand.serialize())), false);
         return this.channel.send(wrappedCommand);
     }
 }

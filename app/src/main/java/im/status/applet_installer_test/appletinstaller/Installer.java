@@ -64,13 +64,10 @@ public class Installer {
         InputStream in = this.assets.open(this.capPath);
         Load load = new Load(in);
 
-        Logger.log("---- Before");
         APDUCommand loadCmd;
         while((loadCmd = load.getCommand()) != null) {
-            Logger.log("sending load command " + load.getCount());
-            this.send("load " + load.getCount(), loadCmd);
+            this.send("load " + load.getCount() + "/31", loadCmd);
         }
-        Logger.log("---- After");
 
 
         byte[] packageAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
@@ -80,6 +77,8 @@ public class Installer {
         byte[] params = HexUtils.hexStringToByteArray("3236393732333032383339318bfb5c8ea8b78a84b9efbfbc897d80312e71e559145947f447d8b6d0d9fcdb55");
         InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params);
         this.send("install and make selectable", install.getCommand());
+
+        Logger.log("installation completed");
     }
 
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {
