@@ -5,48 +5,50 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import java.io.IOException;
 import java.security.Security;
 
-import java.io.ByteArrayOutputStream;
-import java.net.URL;
-import java.security.SecureRandom;
-
-public class MainActivity extends AppCompatActivity implements NfcAdapter.ReaderCallback, LogListener {
+public class MainActivity extends AppCompatActivity implements UILogger {
     static {
         Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
     }
 
     private NfcAdapter nfcAdapter;
     private TextView textView;
+    private ScrollView textViewScroll;
+
     private Button buttonInstall;
     private Button buttonPerfTest;
     private Tag tag;
     private boolean installationAttempted;
-    private TagManager tagManager;
+    private CardManager cardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
-        Logger.setListener(this);
-        this.tagManager = new TagManager(nfcAdapter);
-        this.tagManager.start();
+        Logger.setUILogger(this);
+
+        AssetManager assets = this.getAssets();
+        this.cardManager = new CardManager(nfcAdapter, assets, "wallet.cap");
+        this.cardManager.start();
+
+        textViewScroll = (ScrollView) findViewById(R.id.textViewScroll);
+
         textView = (TextView) findViewById(R.id.textView);
         textView.setMovementMethod(new ScrollingMovementMethod());
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
-        buttonInstall.setEnabled(false);
+        buttonInstall.setEnabled(true);
         buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                disableButtons();
+                //disableButtons();
                 try {
                     install();
                 } catch (APDUException e) {
@@ -81,17 +83,9 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     }
 
     public void install() throws IOException, APDUException {
-        //if (installationAttempted) {
-        //    throw new APDUException("installation already attempted");
-        //}
-
-        installationAttempted = true;
-
-        CardManager cm = new CardManager(tag);
-        cm.connect();
-
-        AssetManager assets = this.getAssets();
-        cm.install(assets, "wallet.cap");
+        if (this.cardManager != null) {
+            this.cardManager.startInstallation();
+        }
     }
 
     public void perfTest() throws Exception {
@@ -105,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
     public void onResume() {
         super.onResume();
         if (nfcAdapter != null) {
-            nfcAdapter.enableReaderMode(this, this.tagManager,
+            nfcAdapter.enableReaderMode(this, this.cardManager,
                     NfcAdapter.FLAG_READER_NFC_A |
                             NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
                     null);
@@ -117,21 +111,6 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
         super.onPause();
         if (nfcAdapter != null) {
             nfcAdapter.disableReaderMode(this);
-        }
-    }
-
-    @Override
-    public void onTagDiscovered(Tag tag) {
-        Logger.log("tag found");
-        try {
-            start(tag);
-        } catch (final IOException e) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    textView.append("\nexception: " + e.getMessage());
-                }
-            });
         }
     }
 
@@ -165,6 +144,8 @@ public class MainActivity extends AppCompatActivity implements NfcAdapter.Reader
             @Override
             public void run() {
                 textView.append(s + "\n");
+                //textViewScroll.fullScroll(ScrollView.FOCUS_DOWN);
+                textViewScroll.scrollTo(0, textView.getBottom());
             }
         });
     }
