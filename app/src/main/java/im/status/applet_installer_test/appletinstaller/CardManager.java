@@ -59,8 +59,8 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             }
 
             if (connected && this.installationRequested && !this.installing) {
-                long now = System.nanoTime();
-                if (now - this.cardConnectedAt > 2e+9) {
+                long now = System.currentTimeMillis();
+                if (now - this.cardConnectedAt > 2000) {
                     this.install();
                 }
             }
@@ -75,7 +75,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
     }
 
     private void onCardConnected() {
-        this.cardConnectedAt = System.nanoTime();
+        this.cardConnectedAt = System.currentTimeMillis();
         if (this.installationRequested) {
             Logger.log("waiting 2 seconds to start installation");
         } else {

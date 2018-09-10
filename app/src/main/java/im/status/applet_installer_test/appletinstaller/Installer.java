@@ -32,6 +32,8 @@ public class Installer {
     }
 
     public void start() throws IOException, APDUException {
+        long startTime = System.currentTimeMillis();
+
         Select discover = new Select(new byte[0]);
         APDUResponse resp = this.send("discover", discover.getCommand());
 
@@ -83,7 +85,8 @@ public class Installer {
         InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params);
         this.send("install and make selectable", install.getCommand());
 
-        Logger.log("installation completed");
+        long duration = System.currentTimeMillis() - startTime;
+        Logger.log(String.format("installation completed in %d seconds", duration / 1000));
     }
 
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {
