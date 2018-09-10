@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.security.SecureRandom;
 
+import im.status.applet_installer_test.appletinstaller.apducommands.Delete;
 import im.status.applet_installer_test.appletinstaller.apducommands.ExternalAuthenticate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InstallForInstall;
@@ -56,6 +57,10 @@ public class Installer {
         //resp = this.send("status", status.getCommand());
 
         byte[] aid = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
+
+        Delete delete = new Delete(aid);
+        this.channel.send(delete.getCommand());
+
         InstallForLoad preLoad = new InstallForLoad(aid, sdaid);
         this.send("install for load", preLoad.getCommand());
 
