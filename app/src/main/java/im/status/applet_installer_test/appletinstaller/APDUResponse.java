@@ -7,6 +7,7 @@ public class APDUResponse {
     public static int SW_SECURITY_CONDITION_NOT_SATISFIED = 0x6982;
     public static int SW_AUTHENTICATION_METHOD_BLOCKED = 0x6983;
     public static int SW_CARD_LOCKED = 0x6283;
+    public static int SW_REFERENCED_DATA_NOT_FOUND = 0x6A88;
 
     private byte[] apdu;
     private byte[] data;
