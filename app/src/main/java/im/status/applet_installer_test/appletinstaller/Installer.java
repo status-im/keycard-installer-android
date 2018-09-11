@@ -66,7 +66,7 @@ public class Installer {
 
 
         InstallForLoad preLoad = new InstallForLoad(aid, sdaid);
-        this.send("install for load", preLoad.getCommand());
+        this.send("perform for load", preLoad.getCommand());
 
 
         //URL url = this.getClass().getClassLoader().getResource("wallet.cap");
@@ -85,7 +85,7 @@ public class Installer {
 
         byte[] params = HexUtils.hexStringToByteArray("3236393732333032383339318bfb5c8ea8b78a84b9efbfbc897d80312e71e559145947f447d8b6d0d9fcdb55");
         InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params);
-        this.send("install and make selectable", install.getCommand());
+        this.send("perform and make selectable", install.getCommand());
 
         long duration = System.currentTimeMillis() - startTime;
         Logger.log(String.format("installation completed in %d seconds", duration / 1000));

@@ -8,9 +8,14 @@ interface UILogger {
 
 public class Logger {
     private static UILogger uiLogger;
+    private static boolean mute;
 
     public static void setUILogger(UILogger l) {
         uiLogger = l;
+    }
+
+    public static void setMute(boolean m) {
+        mute = m;
     }
 
     public static void log(String m) {
@@ -18,7 +23,7 @@ public class Logger {
     }
 
     public static void log(String m, boolean showInUI) {
-        if (m != null) {
+        if (!mute && m != null) {
             Log.d("installer-debug", m);
             if (showInUI && uiLogger != null) {
                 uiLogger.log(m);

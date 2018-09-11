@@ -44,7 +44,7 @@ public class InstallForInstall {
         data.write(fullParams.length);
         data.write(fullParams);
 
-        // empty install token
+        // empty perform token
         data.write(0x00);
 
         return new APDUCommand(CLA, INS, P1, P2, data.toByteArray() );

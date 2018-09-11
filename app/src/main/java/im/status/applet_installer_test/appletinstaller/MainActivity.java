@@ -4,13 +4,11 @@ import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import java.io.IOException;
 import java.security.Security;
 
 public class MainActivity extends AppCompatActivity implements UILogger {
@@ -24,8 +22,6 @@ public class MainActivity extends AppCompatActivity implements UILogger {
 
     private Button buttonInstall;
     private Button buttonPerfTest;
-    private Tag tag;
-    private boolean installationAttempted;
     private CardManager cardManager;
 
     @Override
@@ -44,31 +40,17 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         textView = (TextView) findViewById(R.id.textView);
         textView.setMovementMethod(new ScrollingMovementMethod());
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
-        buttonInstall.setEnabled(true);
         buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //disableButtons();
-                try {
-                    install();
-                } catch (APDUException e) {
-                    logException(e);
-                } catch (IOException e) {
-                    logException(e);
-                }
+                requestAction(CardManager.ACTION_INSTALL);
             }
         });
         buttonPerfTest = (Button) findViewById(R.id.buttonPerfTest);
-        buttonPerfTest.setEnabled(false);
         buttonPerfTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                disableButtons();
-                try {
-                    perfTest();
-                } catch (Exception e) {
-                    Logger.log(e.getMessage());
-                }
+                requestAction(CardManager.ACTION_PERFTEST);
             }
         });
     }
@@ -82,18 +64,11 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         Logger.log("exception: " + msg);
     }
 
-    public void install() throws IOException, APDUException {
+    private void requestAction(int action) {
         if (this.cardManager != null) {
             clearTextView();
-            this.cardManager.startInstallation();
+            this.cardManager.requestAction(action);
         }
-    }
-
-    public void perfTest() throws Exception {
-        Logger.log("Starting performance tests");
-        PerfTest pf = new PerfTest(tag);
-        pf.connect();
-        pf.test();
     }
 
     @Override
@@ -113,31 +88,6 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         if (nfcAdapter != null) {
             nfcAdapter.disableReaderMode(this);
         }
-    }
-
-    private void start(Tag tag) throws IOException {
-        this.tag = tag;
-        this.enableButtons();
-    }
-
-    public void enableButtons() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                buttonInstall.setEnabled(true);
-                buttonPerfTest.setEnabled(true);
-            }
-        });
-    }
-
-    public void disableButtons() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                buttonInstall.setEnabled(false);
-                buttonPerfTest.setEnabled(false);
-            }
-        });
     }
 
     public void log(final String s) {

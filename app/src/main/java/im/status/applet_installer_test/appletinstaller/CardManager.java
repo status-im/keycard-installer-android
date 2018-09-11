@@ -8,27 +8,46 @@ import android.nfc.tech.IsoDep;
 import java.io.IOException;
 
 public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
+    public final static int ACTION_NONE = 0;
+    public final static int ACTION_INSTALL = 1;
+    public final static int ACTION_PERFTEST = 2;
+
     private NfcAdapter nfcAdapter;
     private AssetManager assets;
     private String capPath;
     private IsoDep isoDep;
-    private boolean installationRequested;
+    private int requestedAction;
     private long cardConnectedAt;
-    private boolean installing;
+    private boolean running;
 
     public CardManager(NfcAdapter nfcAdapter, AssetManager assets, String capPath) {
         this.nfcAdapter = nfcAdapter;
         this.assets = assets;
         this.capPath = capPath;
+        this.requestedAction = ACTION_NONE;
     }
 
     public boolean isConnected() {
         return this.isoDep != null && this.isoDep.isConnected();
     }
 
-    public void startInstallation() {
-        Logger.log("installation requested");
-        this.installationRequested = true;
+    public void requestAction(int actionRequested) {
+        switch(actionRequested) {
+            case ACTION_NONE:
+                Logger.log("cancelling requested action");
+                break;
+            case ACTION_INSTALL:
+                Logger.log("installation requested");
+                break;
+            case ACTION_PERFTEST:
+                Logger.log("performance tests requested");
+                break;
+            default:
+                Logger.log("invalid action requested, ignoring");
+                return;
+        }
+
+        this.requestedAction = actionRequested;
     }
 
     @Override
@@ -58,10 +77,10 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
                 }
             }
 
-            if (connected && this.installationRequested && !this.installing) {
+            if (connected && (this.requestedAction != ACTION_NONE) && !this.running) {
                 long now = System.currentTimeMillis();
                 if (now - this.cardConnectedAt > 2000) {
-                    this.install();
+                    this.perform();
                 }
             }
 
@@ -76,10 +95,10 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
 
     private void onCardConnected() {
         this.cardConnectedAt = System.currentTimeMillis();
-        if (this.installationRequested) {
-            Logger.log("waiting 2 seconds to start installation");
+        if (this.requestedAction != ACTION_NONE) {
+            Logger.log("waiting 2 seconds to start requested action");
         } else {
-            Logger.log("installation not requested yet");
+            Logger.log("no action requested yet");
         }
     }
 
@@ -88,20 +107,34 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
         this.isoDep = null;
     }
 
-    public void install() {
-        Logger.log("starting installation");
-        this.installing = true;
+    private void perform() {
+        Logger.log("starting requested action");
+        this.running = true;
         try {
             CardChannel ch = new CardChannel(this.isoDep);
-            Installer installer = new Installer(ch, this.assets, this.capPath);
-            installer.start();
+
+            switch (requestedAction) {
+                case  ACTION_INSTALL:
+                    Installer installer = new Installer(ch, this.assets, this.capPath);
+                    installer.start();
+                    break;
+                case ACTION_PERFTEST:
+                    PerfTest perfTest = new PerfTest(ch);
+                    perfTest.test();
+                    break;
+                default:
+                    throw new Exception("Unknown action");
+            }
+
         } catch (IOException e) {
             Logger.log("IO exception: " + e.getMessage());
         } catch (APDUException e) {
             Logger.log("APDU exception: " + e.getMessage());
+        } catch (Exception e) {
+            Logger.log("Other exception: " + e.getMessage());
         } finally {
-            this.installing = false;
-            this.installationRequested = false;
+            this.running = false;
+            this.requestedAction = ACTION_NONE;
             this.cardConnectedAt = 0;
         }
     }

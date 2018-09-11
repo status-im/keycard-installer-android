@@ -26,8 +26,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 public class PerfTest {
-  private Tag tag;
-  private IsoDep isoDep;
+  private CardChannel cardChannel;
   private WalletAppletCommandSet cmdSet;
   private SecureChannelSession secureChannel;
 
@@ -52,19 +51,12 @@ public class PerfTest {
   public static final byte[] SHARED_SECRET = new byte[] { (byte) 0x17, (byte) 0x83, (byte) 0x81, (byte) 0xc5, (byte) 0xe8, (byte) 0xd3, (byte) 0x24, (byte) 0xbe, (byte) 0xd4, (byte) 0x03, (byte) 0x3d, (byte) 0x14, (byte) 0xe1, (byte) 0xe1, (byte) 0xfd, (byte) 0xca, (byte) 0xaa, (byte) 0xdb, (byte) 0x74, (byte) 0x80, (byte) 0x38, (byte) 0x69, (byte) 0xbe, (byte) 0xe9, (byte) 0xf7, (byte) 0xa1, (byte) 0x0b, (byte) 0x1b, (byte) 0x71, (byte) 0x08, (byte) 0xed, (byte) 0x53 };
 
 
-  public PerfTest(Tag tag) {
-    this.tag = tag;
-  }
-
-  public void connect() throws IOException {
-    this.isoDep = IsoDep.get(tag);
-    this.isoDep.setTimeout(10000);
-    this.isoDep.connect();
+  public PerfTest(CardChannel cardChannel) {
+    this.cardChannel = cardChannel;
   }
 
   public void test() throws Exception {
-    CardChannel apduChannel = new CardChannel(this.isoDep);
-    cmdSet = new WalletAppletCommandSet(apduChannel);
+    cmdSet = new WalletAppletCommandSet(cardChannel);
     byte[] keyData = extractPublicKeyFromSelect(cmdSet.select().getData());
     secureChannel = new SecureChannelSession(keyData);
     cmdSet.setSecureChannel(secureChannel);
@@ -72,8 +64,13 @@ public class PerfTest {
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.unpairOthers(); // Recover in case of non-clean termination
+    Logger.log("Measuring performances. APDU logging disabled");
+    Logger.log("*********************************************");
+    Logger.setMute(true);
     loadKeys();
+    Logger.setMute(true);
     measureLogin();
+    Logger.log("*********************************************");
     cmdSet.select();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
@@ -92,6 +89,7 @@ public class PerfTest {
     cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
     cmdSet.exportKey(EXPORT_KEY_P1_DATABASE, false).checkOK();
     time = System.currentTimeMillis() - time;
+    Logger.setMute(false);
     Logger.log("Total login time: " + time + "ms");
   }
 
@@ -109,7 +107,7 @@ public class PerfTest {
       cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
     }
     time = System.currentTimeMillis() - time;
-
+    Logger.setMute(false);
     Logger.log("Total time for m/44'/60'/0'/0/0 derivation: " + time + "ms");
   }
 
