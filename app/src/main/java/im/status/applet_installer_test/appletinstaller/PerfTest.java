@@ -1,7 +1,5 @@
 package im.status.applet_installer_test.appletinstaller;
 
-import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
 import im.status.applet_installer_test.appletinstaller.apducommands.SecureChannelSession;
 import im.status.applet_installer_test.appletinstaller.apducommands.WalletAppletCommandSet;
 import org.spongycastle.asn1.ASN1InputStream;
@@ -30,6 +28,12 @@ public class PerfTest {
   private WalletAppletCommandSet cmdSet;
   private SecureChannelSession secureChannel;
 
+  private long openSecureChannelTime = 0;
+  private long loadKeysTime = 0;
+  private long loginTime = 0;
+  private long signTime = 0;
+  private long deriveKeyFromParent = 0;
+  private long getStatusTime = 0;
   private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
   public static final ECDomainParameters CURVE;
 
@@ -43,6 +47,10 @@ public class PerfTest {
   static final byte DERIVE_P1_SOURCE_CURRENT = (byte) 0x80;
   static final byte EXPORT_KEY_P1_WHISPER = 0x01;
   static final byte EXPORT_KEY_P1_DATABASE = 0x02;
+  static final byte SIGN_P1_DATA = 0x00;
+  static final byte SIGN_P1_PRECOMPUTED_HASH = 0x01;
+  static final byte GET_STATUS_P1_APPLICATION = 0x00;
+  static final byte GET_STATUS_P1_KEY_PATH = 0x01;
 
   // m/44'/60'/0'/0/0
   static final byte[] BIP44_PATH = new byte[] { (byte) 0x80, 0x00, 0x00, 0x2c, (byte) 0x80, 0x00, 0x00, 0x3c, (byte) 0x80, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00};
@@ -61,23 +69,47 @@ public class PerfTest {
     secureChannel = new SecureChannelSession(keyData);
     cmdSet.setSecureChannel(secureChannel);
     cmdSet.autoPair(SHARED_SECRET);
+    openSecureChannelTime = System.currentTimeMillis();
     cmdSet.autoOpenSecureChannel();
+    openSecureChannelTime = System.currentTimeMillis() - openSecureChannelTime;
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.unpairOthers(); // Recover in case of non-clean termination
-    Logger.log("Measuring performances. APDU logging disabled");
-    Logger.log("*********************************************");
+    Logger.log("Measuring performances. Logging disabled. Please wait");
     Logger.setMute(true);
-    loadKeys();
-    Logger.setMute(true);
-    measureLogin();
-    Logger.log("*********************************************");
+
+    try {
+      loadKeys();
+      getStatus();
+      login();
+      signTransactions();
+    } finally {
+      Logger.setMute(false);
+    }
+
+    Logger.log("Reenabling logging.");
     cmdSet.select();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.autoUnpair();
+    Logger.log("*************************************************");
+    Logger.log("Opening Secure Channel: " + openSecureChannelTime + "ms");
+    Logger.log("Derivation of m/44'/60'/0'/0/0 from master: " + loadKeysTime + "ms");
+    Logger.log("All following measurements are from application selection to the last needed APDU");
+    Logger.log("GET STATUS: " + getStatusTime + "ms");
+    Logger.log("Login: " + loginTime + "ms");
+    Logger.log("Transaction signature (after login): " + signTime + "ms");
+    Logger.log("Transaction signature (subsequent): " + (signTime - deriveKeyFromParent) + "ms");
   }
 
-  private void measureLogin() throws Exception {
+  private void getStatus() throws Exception {
+    long time = System.currentTimeMillis();
+    cmdSet.select();
+    cmdSet.autoOpenSecureChannel();
+    cmdSet.getStatus(GET_STATUS_P1_APPLICATION).checkOK();
+    getStatusTime = System.currentTimeMillis() - time;
+  }
+
+  private void login() throws Exception {
     long time = System.currentTimeMillis();
     cmdSet.select();
     cmdSet.autoOpenSecureChannel();
@@ -88,9 +120,7 @@ public class PerfTest {
     resp = cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x01}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
     cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
     cmdSet.exportKey(EXPORT_KEY_P1_DATABASE, false).checkOK();
-    time = System.currentTimeMillis() - time;
-    Logger.setMute(false);
-    Logger.log("Total login time: " + time + "ms");
+    loginTime = System.currentTimeMillis() - time;
   }
 
   private void loadKeys() throws Exception {
@@ -106,9 +136,21 @@ public class PerfTest {
       APDUResponse resp = cmdSet.deriveKey(Arrays.copyOfRange(BIP44_PATH, i, i+4), DERIVE_P1_SOURCE_CURRENT, true, false).checkOK();
       cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
     }
-    time = System.currentTimeMillis() - time;
-    Logger.setMute(false);
-    Logger.log("Total time for m/44'/60'/0'/0/0 derivation: " + time + "ms");
+
+    loadKeysTime = System.currentTimeMillis() - time;
+  }
+
+  private void signTransactions() throws Exception {
+    long time = System.currentTimeMillis();
+    cmdSet.select();
+    cmdSet.autoOpenSecureChannel();
+    cmdSet.verifyPIN("000000").checkOK();
+    deriveKeyFromParent = System.currentTimeMillis();
+    APDUResponse resp = cmdSet.deriveKey(new byte[] { (byte) 0x00, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
+    cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
+    deriveKeyFromParent = System.currentTimeMillis() - deriveKeyFromParent;
+    cmdSet.sign("any32bytescanbeahashyouknowthat!".getBytes(), SIGN_P1_PRECOMPUTED_HASH, true, true).checkOK();
+    signTime = System.currentTimeMillis() - time;
   }
 
   private KeyPairGenerator keypairGenerator() throws Exception {
