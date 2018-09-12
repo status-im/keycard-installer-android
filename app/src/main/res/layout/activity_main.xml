@@ -17,10 +17,9 @@
             android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="30dp"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:paddingBottom="30dp"
-            android:text="\n"
             android:textIsSelectable="true" />
     </ScrollView>
 
