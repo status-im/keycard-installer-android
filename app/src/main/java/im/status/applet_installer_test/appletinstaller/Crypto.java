@@ -1,16 +1,22 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import org.spongycastle.util.encoders.Hex;
+
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 
@@ -124,5 +130,14 @@ public class Crypto {
         } catch (GeneralSecurityException e) {
             throw new RuntimeException("error generating ICV.", e);
         }
+    }
+
+    public static byte[] generatePairingKey(char[] pairing) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        String salt = "Status Hardware Wallet Lite";
+        PBEKeySpec spec = new PBEKeySpec(pairing, salt.getBytes(), 50000, 32*8);
+        SecretKey key = skf.generateSecret(spec);
+
+        return key.getEncoded();
     }
 }

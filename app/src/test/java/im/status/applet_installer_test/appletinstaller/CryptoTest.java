@@ -1,6 +1,11 @@
 package im.status.applet_installer_test.appletinstaller;
 
 import org.junit.Test;
+import org.spongycastle.util.encoders.Hex;
+
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 import static org.junit.Assert.*;
 import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
@@ -49,5 +54,13 @@ public class CryptoTest {
 
         byte[] result = Crypto.macFull3des(key, data, Crypto.NullBytes8);
         assertEquals(expected, HexUtils.byteArrayToHexString(result));
+    }
+
+    @Test
+    public void generatePairingKey() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String pairing = "zoynhcfz1xJjYqxO";
+        byte[] key = Crypto.generatePairingKey(pairing.toCharArray());
+        String expected = "BF8D606E2FE9292B633DF5E31563AF88928EEBB71FDBCBEF6CADECAA00D7874F";
+        assertEquals(expected, HexUtils.byteArrayToHexString(key));
     }
 }
