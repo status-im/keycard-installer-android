@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
 
         textView = (TextView) findViewById(R.id.textView);
         textView.setMovementMethod(new ScrollingMovementMethod());
+
         buttonInstall = (Button) findViewById(R.id.buttonInstall);
         buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -2,19 +2,18 @@ package im.status.applet_installer_test.appletinstaller;
 
 import android.content.res.AssetManager;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
-import im.status.applet_installer_test.appletinstaller.apducommands.Delete;
 import im.status.applet_installer_test.appletinstaller.apducommands.ExternalAuthenticate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InstallForInstall;
 import im.status.applet_installer_test.appletinstaller.apducommands.InstallForLoad;
 import im.status.applet_installer_test.appletinstaller.apducommands.Load;
 import im.status.applet_installer_test.appletinstaller.apducommands.Select;
-import im.status.applet_installer_test.appletinstaller.apducommands.Status;
 
 public class Installer {
     private Channel channel;
@@ -31,7 +30,7 @@ public class Installer {
         this.capPath = capPath;
     }
 
-    public void start() throws IOException, APDUException {
+    public void start() throws IOException, APDUException, NoSuchAlgorithmException, InvalidKeySpecException {
         long startTime = System.currentTimeMillis();
 
         Select discover = new Select(new byte[0]);
@@ -83,9 +82,15 @@ public class Installer {
         byte[] appletAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
         byte[] instanceAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
 
-        byte[] params = HexUtils.hexStringToByteArray("3236393732333032383339318bfb5c8ea8b78a84b9efbfbc897d80312e71e559145947f447d8b6d0d9fcdb55");
-        InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params);
+        Secrets secrets = Secrets.generate();
+        ByteArrayOutputStream params = new ByteArrayOutputStream();
+        params.write(secrets.getPuk().getBytes());
+        params.write(secrets.getPairingToken());
+
+        InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params.toByteArray());
         this.send("perform and make selectable", install.getCommand());
+
+        Logger.log(String.format("PUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
 
         long duration = System.currentTimeMillis() - startTime;
         Logger.log(String.format("installation completed in %d seconds", duration / 1000));
