@@ -1,13 +1,13 @@
 package im.status.applet_installer_test.appletinstaller;
 
-import org.spongycastle.util.encoders.Hex;
-
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -22,6 +22,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class Crypto {
     public static final byte[] NullBytes8 = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+    public static long PUK_BOUND = 999999999999L;
 
     public static byte[] deriveKey(byte[] cardKey, byte[] seq, byte[] purposeData) {
         byte[] key24 = resizeKey24(cardKey);
@@ -139,5 +141,25 @@ public class Crypto {
         SecretKey key = skf.generateSecret(spec);
 
         return key.getEncoded();
+    }
+
+    public static byte[] randomBytes(int length) {
+        SecureRandom random = new SecureRandom();
+        byte data[] = new byte[length];
+        random.nextBytes(data);
+
+        return data;
+    }
+
+    public static long randomLong(long bound) {
+        SecureRandom random = new SecureRandom();
+        return Math.abs(random.nextLong()) % bound;
+    }
+
+    public static String randomToken(int length) {
+        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+        String token = encoder.encodeToString(randomBytes(length));
+
+        return token;
     }
 }

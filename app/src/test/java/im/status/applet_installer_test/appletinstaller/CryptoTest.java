@@ -3,6 +3,9 @@ package im.status.applet_installer_test.appletinstaller;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;

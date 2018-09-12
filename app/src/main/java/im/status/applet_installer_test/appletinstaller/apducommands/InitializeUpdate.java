@@ -32,11 +32,7 @@ public class InitializeUpdate {
     }
 
     public static byte[] generateChallenge() {
-        SecureRandom random = new SecureRandom();
-        byte challenge[] = new byte[8];
-        random.nextBytes(challenge);
-
-        return challenge;
+        return Crypto.randomBytes(8);
     }
 
     public Session verifyResponse(Keys cardKeys, APDUResponse resp) throws APDUException {
