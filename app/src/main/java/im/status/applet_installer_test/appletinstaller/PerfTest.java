@@ -20,6 +20,8 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -40,6 +42,16 @@ public class PerfTest {
   static {
     FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
     CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
+
+    byte[] tmp;
+
+    try {
+      tmp = Crypto.generatePairingKey(new char[] {'W', 'a', 'l', 'l', 'e', 't', 'A','p', 'p', 'l', 'e', 't', 'T', 'e', 's', 't'});
+    } catch (Exception e) {
+      tmp = null;
+    }
+
+    SHARED_SECRET = tmp;
   }
 
   static final byte DERIVE_P1_SOURCE_MASTER = (byte) 0x00;
@@ -56,8 +68,7 @@ public class PerfTest {
   static final byte[] BIP44_PATH = new byte[] { (byte) 0x80, 0x00, 0x00, 0x2c, (byte) 0x80, 0x00, 0x00, 0x3c, (byte) 0x80, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00};
 
   // TODO: Make this an input
-  public static final byte[] SHARED_SECRET = new byte[] { (byte) 0x17, (byte) 0x83, (byte) 0x81, (byte) 0xc5, (byte) 0xe8, (byte) 0xd3, (byte) 0x24, (byte) 0xbe, (byte) 0xd4, (byte) 0x03, (byte) 0x3d, (byte) 0x14, (byte) 0xe1, (byte) 0xe1, (byte) 0xfd, (byte) 0xca, (byte) 0xaa, (byte) 0xdb, (byte) 0x74, (byte) 0x80, (byte) 0x38, (byte) 0x69, (byte) 0xbe, (byte) 0xe9, (byte) 0xf7, (byte) 0xa1, (byte) 0x0b, (byte) 0x1b, (byte) 0x71, (byte) 0x08, (byte) 0xed, (byte) 0x53 };
-
+  public static final byte[] SHARED_SECRET;
 
   public PerfTest(CardChannel cardChannel) {
     this.cardChannel = cardChannel;
