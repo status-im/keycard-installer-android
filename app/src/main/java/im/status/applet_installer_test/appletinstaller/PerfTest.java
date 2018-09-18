@@ -57,8 +57,7 @@ public class PerfTest {
   static final byte DERIVE_P1_SOURCE_MASTER = (byte) 0x00;
   static final byte DERIVE_P1_SOURCE_PARENT = (byte) 0x40;
   static final byte DERIVE_P1_SOURCE_CURRENT = (byte) 0x80;
-  static final byte EXPORT_KEY_P1_WHISPER = 0x01;
-  static final byte EXPORT_KEY_P1_DATABASE = 0x02;
+  static final byte EXPORT_KEY_P1_HIGH = 0x01;
   static final byte SIGN_P1_DATA = 0x00;
   static final byte SIGN_P1_PRECOMPUTED_HASH = 0x01;
   static final byte GET_STATUS_P1_APPLICATION = 0x00;
@@ -127,10 +126,10 @@ public class PerfTest {
     cmdSet.verifyPIN("000000").checkOK();
     APDUResponse resp = cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
     cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
-    cmdSet.exportKey(EXPORT_KEY_P1_WHISPER, false).checkOK();
+    cmdSet.exportKey(EXPORT_KEY_P1_HIGH, false).checkOK();
     resp = cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x01}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
     cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
-    cmdSet.exportKey(EXPORT_KEY_P1_DATABASE, false).checkOK();
+    cmdSet.exportKey(EXPORT_KEY_P1_HIGH, false).checkOK();
     loginTime = System.currentTimeMillis() - time;
   }
 
