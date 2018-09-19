@@ -1,5 +1,7 @@
 package im.status.applet_installer_test.appletinstaller;
 
+import android.util.Log;
+
 import im.status.applet_installer_test.appletinstaller.apducommands.SecureChannelSession;
 import im.status.applet_installer_test.appletinstaller.apducommands.WalletAppletCommandSet;
 import org.spongycastle.asn1.ASN1InputStream;
@@ -84,8 +86,8 @@ public class PerfTest {
     openSecureChannelTime = System.currentTimeMillis() - openSecureChannelTime;
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.unpairOthers(); // Recover in case of non-clean termination
-    Logger.log("Measuring performances. Logging disabled. Please wait");
-    Logger.setMute(true);
+    Logger.i("Measuring performances. Logging disabled. Please wait");
+    Logger.setLevel(Log.INFO);
 
     try {
       loadKeys();
@@ -93,22 +95,23 @@ public class PerfTest {
       login();
       signTransactions();
     } finally {
-      Logger.setMute(false);
+      Logger.setLevel(Log.INFO);
+      Logger.setUILevel(Log.INFO);
     }
 
-    Logger.log("Reenabling logging.");
+    Logger.i("Reenabling logging.");
     cmdSet.select();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.autoUnpair();
-    Logger.log("*************************************************");
-    Logger.log("Opening Secure Channel: " + openSecureChannelTime + "ms");
-    Logger.log("Derivation of m/44'/60'/0'/0/0 from master: " + loadKeysTime + "ms");
-    Logger.log("All following measurements are from application selection to the last needed APDU");
-    Logger.log("GET STATUS: " + getStatusTime + "ms");
-    Logger.log("Login: " + loginTime + "ms");
-    Logger.log("Transaction signature (after login): " + signTime + "ms");
-    Logger.log("Transaction signature (subsequent): " + (signTime - deriveKeyFromParent) + "ms");
+    Logger.i("*************************************************");
+    Logger.i("Opening Secure Channel: " + openSecureChannelTime + "ms");
+    Logger.i("Derivation of m/44'/60'/0'/0/0 from master: " + loadKeysTime + "ms");
+    Logger.i("All following measurements are from application selection to the last needed APDU");
+    Logger.i("GET STATUS: " + getStatusTime + "ms");
+    Logger.i("Login: " + loginTime + "ms");
+    Logger.i("Transaction signature (after login): " + signTime + "ms");
+    Logger.i("Transaction signature (subsequent): " + (signTime - deriveKeyFromParent) + "ms");
   }
 
   private void getStatus() throws Exception {

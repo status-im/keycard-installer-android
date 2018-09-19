@@ -15,9 +15,9 @@ public class CardChannel implements Channel {
 
     public APDUResponse send(APDUCommand cmd) throws IOException {
         byte[] apdu = cmd.serialize();
-        Logger.log(String.format("COMMAND  %s", HexUtils.byteArrayToHexString(apdu)));
+        Logger.d(String.format("COMMAND  %s", HexUtils.byteArrayToHexString(apdu)));
         byte[] resp = this.isoDep.transceive(apdu);
-        Logger.log(String.format("RESPONSE %s %n-----------------------", HexUtils.byteArrayToHexString(resp)));
+        Logger.d(String.format("RESPONSE %s %n-----------------------", HexUtils.byteArrayToHexString(resp)));
         return new APDUResponse(resp);
     }
 }

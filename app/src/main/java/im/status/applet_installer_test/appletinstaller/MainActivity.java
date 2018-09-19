@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
@@ -54,6 +55,9 @@ public class MainActivity extends AppCompatActivity implements UILogger {
                 requestAction(CardManager.ACTION_PERFTEST);
             }
         });
+
+        //Logger.setUILevel(Log.INFO);
+        //Logger.setLevel(Log.INFO);
     }
 
     private void logException(Exception e) {
@@ -62,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
             msg = "exception without message";
         }
 
-        Logger.log("exception: " + msg);
+        Logger.e("exception: " + msg);
     }
 
     private void requestAction(int action) {

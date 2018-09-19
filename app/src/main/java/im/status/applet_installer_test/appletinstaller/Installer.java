@@ -31,13 +31,14 @@ public class Installer {
     }
 
     public void start() throws IOException, APDUException, NoSuchAlgorithmException, InvalidKeySpecException {
+        Logger.i("installation started");
         long startTime = System.currentTimeMillis();
 
         Select discover = new Select(new byte[0]);
         APDUResponse resp = this.send("discover", discover.getCommand());
 
         byte[] sdaid = this.getSDAID(resp.getData());
-        Logger.log("sdaid: " + HexUtils.byteArrayToHexString(sdaid));
+        Logger.d("sdaid: " + HexUtils.byteArrayToHexString(sdaid));
 
         byte[] hostChallenge = InitializeUpdate.generateChallenge();
         InitializeUpdate init = new InitializeUpdate(hostChallenge);
@@ -90,18 +91,18 @@ public class Installer {
         InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params.toByteArray());
         this.send("perform and make selectable", install.getCommand());
 
-        Logger.log(String.format("PUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
+        Logger.i(String.format("PUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
 
         long duration = System.currentTimeMillis() - startTime;
-        Logger.log(String.format("installation completed in %d seconds", duration / 1000));
+        Logger.i(String.format("installation completed in %d seconds", duration / 1000));
     }
 
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {
-        Logger.log("sending command " + description);
+        Logger.d("sending command " + description);
         APDUResponse resp = this.channel.send(cmd);
 
         if(resp.getSw() == APDUResponse.SW_SECURITY_CONDITION_NOT_SATISFIED) {
-            Logger.log("SW_SECURITY_CONDITION_NOT_SATISFIED: card might be blocked");
+            Logger.e("SW_SECURITY_CONDITION_NOT_SATISFIED: card might be blocked");
             throw new APDUException(resp.getSw(), "security confition not satisfied. card might be blocked " + description);
         }
 

@@ -34,16 +34,16 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
     public void requestAction(int actionRequested) {
         switch(actionRequested) {
             case ACTION_NONE:
-                Logger.log("cancelling requested action");
+                Logger.i("cancelling requested action");
                 break;
             case ACTION_INSTALL:
-                Logger.log("installation requested");
+                Logger.i("installation requested");
                 break;
             case ACTION_PERFTEST:
-                Logger.log("performance tests requested");
+                Logger.i("performance tests requested");
                 break;
             default:
-                Logger.log("invalid action requested, ignoring");
+                Logger.i("invalid action requested, ignoring");
                 return;
         }
 
@@ -58,7 +58,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             this.isoDep.connect();
             this.isoDep.setTimeout(120000);
         } catch (IOException e) {
-            Logger.log("error connecting to tag");
+            Logger.e("error connecting to tag");
         }
     }
 
@@ -69,7 +69,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             boolean newConnected = this.isConnected();
             if (newConnected != connected) {
                 connected = newConnected;
-                Logger.log("tag " + (connected ? "connected" : "disconnected"));
+                Logger.i("tag " + (connected ? "connected" : "disconnected"));
                 if (connected) {
                     this.onCardConnected();
                 } else {
@@ -87,7 +87,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             try {
                 this.sleep(50);
             } catch (InterruptedException e) {
-                Logger.log("error in TagManager thread: " + e.getMessage());
+                Logger.e("error in TagManager thread: " + e.getMessage());
                 this.interrupt();
             }
         }
@@ -96,9 +96,9 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
     private void onCardConnected() {
         this.cardConnectedAt = System.currentTimeMillis();
         if (this.requestedAction != ACTION_NONE) {
-            Logger.log("waiting 2 seconds to start requested action");
+            Logger.i("waiting 2 seconds to start requested action");
         } else {
-            Logger.log("no action requested yet");
+            Logger.i("no action requested yet");
         }
     }
 
@@ -108,7 +108,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
     }
 
     private void perform() {
-        Logger.log("starting requested action");
+        Logger.i("starting requested action");
         this.running = true;
         try {
             CardChannel ch = new CardChannel(this.isoDep);
@@ -127,11 +127,11 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             }
 
         } catch (IOException e) {
-            Logger.log("IO exception: " + e.getMessage());
+            Logger.e("IO exception: " + e.getMessage());
         } catch (APDUException e) {
-            Logger.log("APDU exception: " + e.getMessage());
+            Logger.e("APDU exception: " + e.getMessage());
         } catch (Exception e) {
-            Logger.log("Other exception: " + e.getMessage());
+            Logger.e("Other exception: " + e.getMessage());
         } finally {
             this.running = false;
             this.requestedAction = ACTION_NONE;
