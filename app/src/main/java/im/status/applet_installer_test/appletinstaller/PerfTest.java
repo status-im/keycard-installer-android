@@ -22,8 +22,6 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -60,7 +58,6 @@ public class PerfTest {
   static final byte DERIVE_P1_SOURCE_PARENT = (byte) 0x40;
   static final byte DERIVE_P1_SOURCE_CURRENT = (byte) 0x80;
   static final byte EXPORT_KEY_P1_HIGH = 0x01;
-  static final byte SIGN_P1_DATA = 0x00;
   static final byte SIGN_P1_PRECOMPUTED_HASH = 0x01;
   static final byte GET_STATUS_P1_APPLICATION = 0x00;
   static final byte GET_STATUS_P1_KEY_PATH = 0x01;
@@ -127,11 +124,9 @@ public class PerfTest {
     cmdSet.select();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
-    APDUResponse resp = cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
-    cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
+    cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, false, false).checkOK();
     cmdSet.exportKey(EXPORT_KEY_P1_HIGH, false).checkOK();
-    resp = cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x01}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
-    cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
+    cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x01}, DERIVE_P1_SOURCE_PARENT, false, false).checkOK();
     cmdSet.exportKey(EXPORT_KEY_P1_HIGH, false).checkOK();
     loginTime = System.currentTimeMillis() - time;
   }
@@ -145,11 +140,7 @@ public class PerfTest {
     cmdSet.loadKey(keyPair, false, chainCode).checkOK();
 
     long time = System.currentTimeMillis();
-    for (int i = 0; i < BIP44_PATH.length; i += 4) {
-      APDUResponse resp = cmdSet.deriveKey(Arrays.copyOfRange(BIP44_PATH, i, i+4), DERIVE_P1_SOURCE_CURRENT, true, false).checkOK();
-      cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
-    }
-
+    cmdSet.deriveKey(BIP44_PATH, DERIVE_P1_SOURCE_CURRENT, false, false).checkOK();
     loadKeysTime = System.currentTimeMillis() - time;
   }
 
@@ -159,8 +150,7 @@ public class PerfTest {
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
     deriveKeyFromParent = System.currentTimeMillis();
-    APDUResponse resp = cmdSet.deriveKey(new byte[] { (byte) 0x00, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, true, false).checkOK();
-    cmdSet.deriveKey(derivePublicKey(resp.getData()), DERIVE_P1_SOURCE_CURRENT, true, true).checkOK();
+    cmdSet.deriveKey(new byte[] { (byte) 0x00, 0x00, 0x00, 0x00}, DERIVE_P1_SOURCE_PARENT, false, false).checkOK();
     deriveKeyFromParent = System.currentTimeMillis() - deriveKeyFromParent;
     cmdSet.sign("any32bytescanbeahashyouknowthat!".getBytes(), SIGN_P1_PRECOMPUTED_HASH, true, true).checkOK();
     signTime = System.currentTimeMillis() - time;
