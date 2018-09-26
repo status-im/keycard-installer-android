@@ -82,7 +82,7 @@ public class Installer {
 
         APDUCommand loadCmd;
         while((loadCmd = load.getCommand()) != null) {
-            this.send("load " + load.getCount() + "/31", loadCmd);
+            this.send("load " + load.getCount() + "/32", loadCmd);
         }
 
 
