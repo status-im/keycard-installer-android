@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 
+import im.status.applet_installer_test.appletinstaller.apducommands.Delete;
 import im.status.applet_installer_test.appletinstaller.apducommands.ExternalAuthenticate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
 import im.status.applet_installer_test.appletinstaller.apducommands.InstallForInstall;
@@ -59,10 +60,16 @@ public class Installer {
         //resp = this.send("status", status.getCommand());
 
         byte[] aid = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
+        byte[] appletAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
 
-        //Delete delete = new Delete(aid);
-        //Logger.log("sending command delete");
-        //this.channel.send(delete.getCommand());
+
+        Delete deleteApplet = new Delete(appletAID);
+        Logger.i("sending delete (applet)");
+        this.channel.send(deleteApplet.getCommand());
+
+        Delete deletePkg = new Delete(aid);
+        Logger.i("sending delete (pkg)");
+        this.channel.send(deletePkg.getCommand());
 
 
         InstallForLoad preLoad = new InstallForLoad(aid, sdaid);
@@ -80,7 +87,6 @@ public class Installer {
 
 
         byte[] packageAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
-        byte[] appletAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
         byte[] instanceAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
 
         Secrets secrets = Secrets.generate();

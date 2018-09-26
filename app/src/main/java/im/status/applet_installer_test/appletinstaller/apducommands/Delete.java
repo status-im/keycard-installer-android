@@ -6,7 +6,8 @@ public class Delete {
     private static final int CLA = 0x80;
     private static final int INS = 0xE4;
     private static final int P1 = 0x00;
-    private static final int P2 = 0x80; // delete object and related files
+    //private static final int P2 = 0x80; // delete object and related files
+    private static final int P2 = 0x00;
 
     private byte[] aid;
 
