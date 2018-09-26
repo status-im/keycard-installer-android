@@ -14,7 +14,7 @@ public class DeleteTest {
     public void getCommand() throws IOException {
         byte[] aid = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
         Delete delete = new Delete(aid);
-        String expected = "80E400800E4F0C53746174757357616C6C6574";
+        String expected = "80E400000E4F0C53746174757357616C6C6574";
         byte[] apdu = delete.getCommand().serialize();
         assertEquals(expected, HexUtils.byteArrayToHexString(apdu));
     }
