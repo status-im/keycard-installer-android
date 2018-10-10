@@ -114,7 +114,7 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
             CardChannel ch = new CardChannel(this.isoDep);
 
             switch (requestedAction) {
-                case  ACTION_INSTALL:
+                case ACTION_INSTALL:
                     Installer installer = new Installer(ch, this.assets, this.capPath);
                     installer.start();
                     break;

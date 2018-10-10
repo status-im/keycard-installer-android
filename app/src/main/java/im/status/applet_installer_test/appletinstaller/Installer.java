@@ -7,16 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 
-import im.status.applet_installer_test.appletinstaller.apducommands.Delete;
-import im.status.applet_installer_test.appletinstaller.apducommands.ExternalAuthenticate;
-import im.status.applet_installer_test.appletinstaller.apducommands.InitializeUpdate;
-import im.status.applet_installer_test.appletinstaller.apducommands.InstallForInstall;
-import im.status.applet_installer_test.appletinstaller.apducommands.InstallForLoad;
-import im.status.applet_installer_test.appletinstaller.apducommands.Load;
-import im.status.applet_installer_test.appletinstaller.apducommands.Select;
+import im.status.applet_installer_test.appletinstaller.apducommands.*;
 
 public class Installer {
+    private Channel plainChannel;
     private Channel channel;
     private Keys cardKeys;
     private AssetManager assets;
@@ -25,6 +21,7 @@ public class Installer {
     static final byte[] cardKeyData = HexUtils.hexStringToByteArray("404142434445464748494a4b4c4d4e4f");
 
     public Installer(Channel channel, AssetManager assets, String capPath) {
+        this.plainChannel = channel;
         this.channel = channel;
         this.cardKeys = new Keys(cardKeyData, cardKeyData);
         this.assets = assets;
@@ -82,25 +79,32 @@ public class Installer {
 
         APDUCommand loadCmd;
         while((loadCmd = load.getCommand()) != null) {
-            this.send("load " + load.getCount() + "/32", loadCmd);
+            this.send("load " + load.getCount() + "/37", loadCmd);
         }
 
 
         byte[] packageAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
         byte[] instanceAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
 
-        Secrets secrets = Secrets.generate();
-        ByteArrayOutputStream params = new ByteArrayOutputStream();
-        params.write(secrets.getPuk().getBytes());
-        params.write(secrets.getPairingToken());
-
-        InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, params.toByteArray());
+        InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, new byte[0]);
         this.send("perform and make selectable", install.getCommand());
 
-        Logger.i(String.format("PUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
+
+        installSecrets();
 
         long duration = System.currentTimeMillis() - startTime;
         Logger.i(String.format("installation completed in %d seconds", duration / 1000));
+    }
+
+    private void installSecrets() throws NoSuchAlgorithmException, InvalidKeySpecException, APDUException, IOException {
+        Secrets secrets = Secrets.generate();
+        Logger.i(String.format("PIN: %s\nPUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPin(), secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
+
+        WalletAppletCommandSet cmdSet = new WalletAppletCommandSet((CardChannel) this.plainChannel);
+        byte[] ecKey = cmdSet.select().checkOK().getData();
+        SecureChannelSession secureChannel = new SecureChannelSession(Arrays.copyOfRange(ecKey, 2, ecKey.length));
+        cmdSet.setSecureChannel(secureChannel);
+        cmdSet.init(secrets.getPin(), secrets.getPuk(), secrets.getPairingToken()).checkOK();
     }
 
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {

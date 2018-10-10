@@ -57,6 +57,12 @@ public class SecureChannelSession {
    * @param keyData the public key returned by the applet as response to the SELECT command
    */
   public SecureChannelSession(byte[] keyData) {
+      random = new SecureRandom();
+      generateSecret(keyData);
+      open = false;
+  }
+
+  public void generateSecret(byte[] keyData) {
     try {
       random = new SecureRandom();
       ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
@@ -74,9 +80,7 @@ public class SecureChannelSession {
 
       keyAgreement.doPhase(cardKey, true);
       secret = keyAgreement.generateSecret();
-
-      open = false;
-    } catch(Exception e) {
+    } catch (Exception e) {
       throw new RuntimeException("Is BouncyCastle in the classpath?", e);
     }
   }
@@ -414,6 +418,32 @@ public class SecureChannelSession {
    */
   public void reset() {
     open = false;
+  }
+
+  /**
+   * Encrypts the payload for the INIT command
+   * @param initData the payload for the INIT command
+   *
+   * @return the encrypted buffer
+   */
+  public byte[] oneShotEncrypt(byte[] initData) {
+    try {
+      iv = new byte[SC_BLOCK_SIZE];
+      random.nextBytes(iv);
+      IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
+      sessionEncKey = new SecretKeySpec(secret, "AES");
+      sessionCipher = Cipher.getInstance("AES/CBC/ISO7816-4Padding");
+      sessionCipher.init(Cipher.ENCRYPT_MODE, sessionEncKey, ivParameterSpec);
+      initData = sessionCipher.doFinal(initData);
+      byte[] encrypted = new byte[1 + publicKey.length + iv.length + initData.length];
+      encrypted[0] = (byte) publicKey.length;
+      System.arraycopy(publicKey, 0, encrypted, 1, publicKey.length);
+      System.arraycopy(iv, 0, encrypted, (1 + publicKey.length), iv.length);
+      System.arraycopy(initData, 0, encrypted, (1 + publicKey.length + iv.length), initData.length);
+      return encrypted;
+    } catch (Exception e) {
+      throw new RuntimeException("Is BouncyCastle in the classpath?", e);
+    }
   }
 
   /**
