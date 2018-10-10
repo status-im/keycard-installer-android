@@ -11,6 +11,7 @@ import org.spongycastle.util.encoders.Hex;
 import java.io.IOException;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.util.Arrays;
 
 /**
  * This class is used to send APDU to the applet. Each method corresponds to an APDU as defined in the APPLICATION.md
@@ -18,6 +19,7 @@ import java.security.PrivateKey;
  * pre/post processing.
  */
 public class WalletAppletCommandSet {
+  static final byte INS_INIT = (byte) 0xFE;
   static final byte INS_GET_STATUS = (byte) 0xF2;
   static final byte INS_VERIFY_PIN = (byte) 0x20;
   static final byte INS_CHANGE_PIN = (byte) 0x21;
@@ -25,6 +27,7 @@ public class WalletAppletCommandSet {
   static final byte INS_LOAD_KEY = (byte) 0xD0;
   static final byte INS_DERIVE_KEY = (byte) 0xD1;
   static final byte INS_GENERATE_MNEMONIC = (byte) 0xD2;
+  static final byte INS_REMOVE_KEY = (byte) 0xD3;
   static final byte INS_SIGN = (byte) 0xC0;
   static final byte INS_SET_PINLESS_PATH = (byte) 0xC1;
   static final byte INS_EXPORT_KEY = (byte) 0xC2;
@@ -175,6 +178,19 @@ public class WalletAppletCommandSet {
   }
 
   /**
+   * Sends a GET STATUS APDU to retrieve the APPLICATION STATUS template and reads the byte indicating key initialization
+   * status
+   *
+   * @return whether public key derivation is supported or not
+   * @throws IOException communication error
+   */
+  public boolean getKeyInitializationStatus() throws IOException {
+    APDUResponse resp = getStatus(GET_STATUS_P1_APPLICATION);
+    byte[] data = resp.getData();
+    return data[data.length - 4] != 0x00;
+  }
+
+  /**
    * Sends a VERIFY PIN APDU. The raw bytes of the given string are encrypted using the secure channel and used as APDU
    * data.
    *
@@ -191,12 +207,26 @@ public class WalletAppletCommandSet {
    * Sends a CHANGE PIN APDU. The raw bytes of the given string are encrypted using the secure channel and used as APDU
    * data.
    *
+   * @param pinType the PIN type
    * @param pin the new PIN
    * @return the raw card response
    * @throws IOException communication error
    */
-  public APDUResponse changePIN(String pin) throws IOException {
-    APDUCommand changePIN = secureChannel.protectedCommand(0x80, INS_CHANGE_PIN, 0, 0, pin.getBytes());
+  public APDUResponse changePIN(int pinType, String pin) throws IOException {
+    return changePIN(pinType, pin.getBytes());
+  }
+
+  /**
+   * Sends a CHANGE PIN APDU. The raw bytes of the given string are encrypted using the secure channel and used as APDU
+   * data.
+   *
+   * @param pinType the PIN type
+   * @param pin the new PIN
+   * @return the raw card response
+   * @throws IOException communication error
+   */
+  public APDUResponse changePIN(int pinType, byte[] pin) throws IOException {
+    APDUCommand changePIN = secureChannel.protectedCommand(0x80, INS_CHANGE_PIN, pinType, 0, pin);
     return secureChannel.transmit(apduChannel, changePIN);
   }
 
@@ -363,6 +393,17 @@ public class WalletAppletCommandSet {
   }
 
   /**
+   * Sends a REMOVE KEY APDU.
+   *
+   * @return the raw card response
+   * @throws IOException communication error
+   */
+  public APDUResponse removeKey() throws IOException {
+    APDUCommand removeKey = secureChannel.protectedCommand(0x80, INS_REMOVE_KEY, 0, 0, new byte[0]);
+    return secureChannel.transmit(apduChannel, removeKey);
+  }
+
+  /**
    * Sends a SIGN APDU. The dataType is P1 as defined in the applet. The isFirst and isLast arguments are used to form
    * the P2 parameter. The data is the data to sign, or part of it. Only when sending the last block a signature is
    * generated and thus returned. When signing a precomputed hash it must be done in a single block, so isFirst and
@@ -437,5 +478,22 @@ public class WalletAppletCommandSet {
     byte p2 = publicOnly ? EXPORT_KEY_P2_PUBLIC_ONLY : EXPORT_KEY_P2_PRIVATE_AND_PUBLIC;
     APDUCommand exportKey = secureChannel.protectedCommand(0x80, INS_EXPORT_KEY, keyPathIndex, p2, new byte[0]);
     return secureChannel.transmit(apduChannel, exportKey);
+  }
+
+  /**
+   * Sends the INIT command to the card.
+   *
+   * @param pin the PIN
+   * @param puk the PUK
+   * @param sharedSecret the shared secret for pairing
+   * @return the raw card response
+   * @throws IOException communication error
+   */
+  public APDUResponse init(String pin, String puk, byte[] sharedSecret) throws IOException {
+    byte[] initData = Arrays.copyOf(pin.getBytes(), pin.length() + puk.length() + sharedSecret.length);
+    System.arraycopy(puk.getBytes(), 0, initData, pin.length(), puk.length());
+    System.arraycopy(sharedSecret, 0, initData, pin.length() + puk.length(), sharedSecret.length);
+    APDUCommand init = new APDUCommand(0x80, INS_INIT, 0, 0, secureChannel.oneShotEncrypt(initData));
+    return apduChannel.send(init);
   }
 }

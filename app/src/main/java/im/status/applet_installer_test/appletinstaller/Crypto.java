@@ -23,6 +23,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class Crypto {
     public static final byte[] NullBytes8 = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+    public static long PIN_BOUND = 999999L;
     public static long PUK_BOUND = 999999999999L;
 
     public static byte[] deriveKey(byte[] cardKey, byte[] seq, byte[] purposeData) {
