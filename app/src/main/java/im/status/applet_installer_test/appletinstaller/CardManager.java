@@ -10,7 +10,8 @@ import java.io.IOException;
 public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
     public final static int ACTION_NONE = 0;
     public final static int ACTION_INSTALL = 1;
-    public final static int ACTION_PERFTEST = 2;
+    public final static int ACTION_INSTALL_TEST = 2;
+    public final static int ACTION_PERFTEST = 3;
 
     private NfcAdapter nfcAdapter;
     private AssetManager assets;
@@ -38,6 +39,9 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
                 break;
             case ACTION_INSTALL:
                 Logger.i("installation requested");
+                break;
+            case ACTION_INSTALL_TEST:
+                Logger.i("installation with test secrets requested");
                 break;
             case ACTION_PERFTEST:
                 Logger.i("performance tests requested");
@@ -115,7 +119,11 @@ public class CardManager extends Thread implements NfcAdapter.ReaderCallback {
 
             switch (requestedAction) {
                 case ACTION_INSTALL:
-                    Installer installer = new Installer(ch, this.assets, this.capPath);
+                    Installer installer = new Installer(ch, this.assets, this.capPath, false);
+                    installer.start();
+                    break;
+                case ACTION_INSTALL_TEST:
+                    installer = new Installer(ch, this.assets, this.capPath, true);
                     installer.start();
                     break;
                 case ACTION_PERFTEST:

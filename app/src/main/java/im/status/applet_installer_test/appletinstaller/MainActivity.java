@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     private ScrollView textViewScroll;
 
     private Button buttonInstall;
+    private Button buttonInstallTest;
     private Button buttonPerfTest;
     private CardManager cardManager;
 
@@ -46,6 +47,13 @@ public class MainActivity extends AppCompatActivity implements UILogger {
             @Override
             public void onClick(View view) {
                 requestAction(CardManager.ACTION_INSTALL);
+            }
+        });
+        buttonInstallTest = (Button) findViewById(R.id.buttonInstallTest);
+        buttonInstallTest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestAction(CardManager.ACTION_INSTALL_TEST);
             }
         });
         buttonPerfTest = (Button) findViewById(R.id.buttonPerfTest);

@@ -24,11 +24,16 @@
     </ScrollView>
 
     <Button
-        android:id="@+id/buttonInstall"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Install" />
+            android:id="@+id/buttonInstall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Install Secure"/>
 
+    <Button
+            android:id="@+id/buttonInstallTest"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Install with test PIN/PUK"/>
     <Button
         android:id="@+id/buttonPerfTest"
         android:layout_width="match_parent"

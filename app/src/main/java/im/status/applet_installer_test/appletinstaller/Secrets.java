@@ -30,6 +30,12 @@ public class Secrets {
         return new Secrets(pin, puk, pairingPassword, pairingToken);
     }
 
+    public static Secrets testSecrets() throws NoSuchAlgorithmException, InvalidKeySpecException {
+        String pairingPassword = "WalletAppletTest";
+        byte[] pairingToken = Crypto.generatePairingKey(pairingPassword.toCharArray());
+        return new Secrets("000000", "123456789012", pairingPassword, pairingToken);
+    }
+
     public String getPin() {
         return pin;
     }
