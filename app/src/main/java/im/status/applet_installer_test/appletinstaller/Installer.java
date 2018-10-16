@@ -58,20 +58,26 @@ public class Installer {
         //Status status = new Status(Status.P1_EXECUTABLE_LOAD_FILES_AND_MODULES);
         //resp = this.send("status", status.getCommand());
 
-        byte[] aid = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
-        byte[] appletAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
+        byte[] packageAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
+        byte[] walletAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
+        byte[] ndefAppletAID = HexUtils.hexStringToByteArray("53746174757357616C6C65744E4643");
+        byte[] ndefInstanceAID = HexUtils.hexStringToByteArray("D2760000850101");
 
 
-        Delete deleteApplet = new Delete(appletAID);
+        Delete deleteNDEFApplet = new Delete(ndefInstanceAID);
+        Logger.i("sending delete (NDEF applet)");
+        this.channel.send(deleteNDEFApplet.getCommand());
+
+        Delete deleteApplet = new Delete(walletAID);
         Logger.i("sending delete (applet)");
         this.channel.send(deleteApplet.getCommand());
 
-        Delete deletePkg = new Delete(aid);
+        Delete deletePkg = new Delete(packageAID);
         Logger.i("sending delete (pkg)");
         this.channel.send(deletePkg.getCommand());
 
 
-        InstallForLoad preLoad = new InstallForLoad(aid, sdaid);
+        InstallForLoad preLoad = new InstallForLoad(packageAID, sdaid);
         this.send("perform for load", preLoad.getCommand());
 
 
@@ -84,13 +90,11 @@ public class Installer {
             this.send("load " + load.getCount() + "/37", loadCmd);
         }
 
+        InstallForInstall installNDEF = new InstallForInstall(packageAID, ndefAppletAID, ndefInstanceAID, new byte[0]);
+        this.send("perform and make selectable (NDEF)", installNDEF.getCommand());
 
-        byte[] packageAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574");
-        byte[] instanceAID = HexUtils.hexStringToByteArray("53746174757357616C6C6574417070");
-
-        InstallForInstall install = new InstallForInstall(packageAID, appletAID, instanceAID, new byte[0]);
-        this.send("perform and make selectable", install.getCommand());
-
+        InstallForInstall install = new InstallForInstall(packageAID, walletAID, walletAID, new byte[0]);
+        this.send("perform and make selectable (wallet)", install.getCommand());
 
         installSecrets();
 
