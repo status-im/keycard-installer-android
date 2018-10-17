@@ -6,8 +6,8 @@ android {
         applicationId "im.status.applet_installer_test.appletinstaller"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 1
-        versionName "0.0.3"
+        versionCode 5
+        versionName "0.0.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
