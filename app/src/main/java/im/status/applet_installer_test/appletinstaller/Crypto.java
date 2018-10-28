@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.Base64;
+import android.util.Base64;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -18,6 +18,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import static android.util.Base64.NO_PADDING;
 
 
 public class Crypto {
@@ -158,9 +159,7 @@ public class Crypto {
     }
 
     public static String randomToken(int length) {
-        Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-        String token = encoder.encodeToString(randomBytes(length));
 
-        return token;
+        return Base64.encodeToString(randomBytes(length),NO_PADDING);
     }
 }
