@@ -2,18 +2,21 @@ package im.status.applet_installer_test.appletinstaller;
 
 import android.content.res.AssetManager;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
 
 import im.status.applet_installer_test.appletinstaller.apducommands.*;
+import im.status.hardwallet_lite_android.io.APDUCommand;
+import im.status.hardwallet_lite_android.io.APDUException;
+import im.status.hardwallet_lite_android.io.APDUResponse;
+import im.status.hardwallet_lite_android.io.CardChannel;
+import im.status.hardwallet_lite_android.wallet.WalletAppletCommandSet;
 
 public class Installer {
-    private Channel plainChannel;
-    private Channel channel;
+    private CardChannel plainChannel;
+    private SecureChannel channel;
     private Keys cardKeys;
     private AssetManager assets;
     private String capPath;
@@ -21,9 +24,8 @@ public class Installer {
 
     static final byte[] cardKeyData = HexUtils.hexStringToByteArray("404142434445464748494a4b4c4d4e4f");
 
-    public Installer(Channel channel, AssetManager assets, String capPath, boolean testSecrets) {
+    public Installer(CardChannel channel, AssetManager assets, String capPath, boolean testSecrets) {
         this.plainChannel = channel;
-        this.channel = channel;
         this.cardKeys = new Keys(cardKeyData, cardKeyData);
         this.assets = assets;
         this.capPath = capPath;
@@ -47,7 +49,7 @@ public class Installer {
         Session session = init.verifyResponse(this.cardKeys, resp);
         Keys sessionKeys = session.getKeys();
 
-        this.channel = new SecureChannel(this.channel, sessionKeys);
+        this.channel = new SecureChannel(this.plainChannel, sessionKeys);
 
         ExternalAuthenticate auth = new ExternalAuthenticate(sessionKeys.getEncKeyData(), session.getCardChallenge(), hostChallenge);
         resp = this.send("external auth", auth.getCommand());
@@ -87,7 +89,7 @@ public class Installer {
 
         APDUCommand loadCmd;
         while((loadCmd = load.getCommand()) != null) {
-            this.send("load " + load.getCount() + "/37", loadCmd);
+            this.send("load " + load.getCount() + "/35", loadCmd);
         }
 
         InstallForInstall installNDEF = new InstallForInstall(packageAID, ndefAppletAID, ndefInstanceAID, new byte[0]);
@@ -96,27 +98,32 @@ public class Installer {
         InstallForInstall install = new InstallForInstall(packageAID, walletAID, walletAID, new byte[0]);
         this.send("perform and make selectable (wallet)", install.getCommand());
 
-        installSecrets();
+        personalizeApplet();
 
         long duration = System.currentTimeMillis() - startTime;
         Logger.i(String.format("installation completed in %d seconds", duration / 1000));
     }
 
-    private void installSecrets() throws NoSuchAlgorithmException, InvalidKeySpecException, APDUException, IOException {
+    private void personalizeApplet() throws NoSuchAlgorithmException, InvalidKeySpecException, APDUException, IOException {
         Secrets secrets = testSecrets ? Secrets.testSecrets() : Secrets.generate();
 
-        WalletAppletCommandSet cmdSet = new WalletAppletCommandSet((CardChannel) this.plainChannel);
-        byte[] ecKey = cmdSet.select().checkOK().getData();
-        SecureChannelSession secureChannel = new SecureChannelSession(Arrays.copyOfRange(ecKey, 2, ecKey.length));
-        cmdSet.setSecureChannel(secureChannel);
+        WalletAppletCommandSet cmdSet = new WalletAppletCommandSet(this.plainChannel);
+        cmdSet.select().checkOK();
         cmdSet.init(secrets.getPin(), secrets.getPuk(), secrets.getPairingToken()).checkOK();
+
+        cmdSet.select().checkOK();
+        cmdSet.autoPair(secrets.getPairingPassword());
+        cmdSet.autoOpenSecureChannel();
+        cmdSet.verifyPIN(secrets.getPin()).checkOK();
+        cmdSet.setNDEF(HexUtils.hexStringToByteArray("0024d40f12616e64726f69642e636f6d3a706b67696d2e7374617475732e657468657265756d")).checkOK();
+        cmdSet.autoUnpair();
 
         Logger.i(String.format("PIN: %s\nPUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPin(), secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
     }
 
     private APDUResponse send(String description, APDUCommand cmd) throws IOException, APDUException {
         Logger.d("sending command " + description);
-        APDUResponse resp = this.channel.send(cmd);
+        APDUResponse resp = this.channel == null ? this.plainChannel.send(cmd) : this.channel.send(cmd);
 
         if(resp.getSw() == APDUResponse.SW_SECURITY_CONDITION_NOT_SATISFIED) {
             Logger.e("SW_SECURITY_CONDITION_NOT_SATISFIED: card might be blocked");

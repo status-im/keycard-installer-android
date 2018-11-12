@@ -1,14 +1,16 @@
 package im.status.applet_installer_test.appletinstaller;
 
-import android.provider.Settings;
+import im.status.hardwallet_lite_android.io.APDUCommand;
+import im.status.hardwallet_lite_android.io.APDUResponse;
+import im.status.hardwallet_lite_android.io.CardChannel;
 
 import java.io.IOException;
 
-public class SecureChannel implements Channel {
-    private Channel channel;
+public class SecureChannel {
+    private CardChannel channel;
     private APDUWrapper wrapper;
 
-    public SecureChannel(Channel channel, Keys keys) {
+    public SecureChannel(CardChannel channel, Keys keys) {
         this.channel = channel;
         this.wrapper = new APDUWrapper(keys.getMacKeyData());
     }

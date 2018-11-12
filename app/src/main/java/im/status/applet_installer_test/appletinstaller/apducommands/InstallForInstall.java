@@ -1,9 +1,9 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
+import im.status.hardwallet_lite_android.io.APDUCommand;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
 
 public class InstallForInstall {
     public static final int CLA = 0x80;

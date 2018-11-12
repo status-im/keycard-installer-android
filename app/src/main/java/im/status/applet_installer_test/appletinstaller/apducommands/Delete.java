@@ -1,6 +1,6 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
+import im.status.hardwallet_lite_android.io.APDUCommand;
 
 public class Delete {
     private static final int CLA = 0x80;

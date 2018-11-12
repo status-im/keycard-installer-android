@@ -1,8 +1,8 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.Crypto;
+import im.status.hardwallet_lite_android.io.APDUCommand;
+import im.status.hardwallet_lite_android.io.APDUResponse;
 
 public class ExternalAuthenticate {
     public static int CLA = 0x84;

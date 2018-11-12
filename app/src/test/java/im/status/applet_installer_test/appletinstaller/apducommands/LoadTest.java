@@ -3,13 +3,6 @@ package im.status.applet_installer_test.appletinstaller.apducommands;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.HexUtils;
-
-import static org.junit.Assert.*;
 
 public class LoadTest {
     @Test
