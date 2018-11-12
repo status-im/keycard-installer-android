@@ -4,9 +4,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.APDUException;
-import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.HexUtils;
 import im.status.applet_installer_test.appletinstaller.Keys;
 

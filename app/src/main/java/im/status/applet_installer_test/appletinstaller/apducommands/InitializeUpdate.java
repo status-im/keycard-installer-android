@@ -1,15 +1,11 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
-import java.security.SecureRandom;
-
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.APDUException;
-import im.status.applet_installer_test.appletinstaller.APDUResponse;
 import im.status.applet_installer_test.appletinstaller.Crypto;
-import im.status.applet_installer_test.appletinstaller.HexUtils;
 import im.status.applet_installer_test.appletinstaller.Keys;
-import im.status.applet_installer_test.appletinstaller.Logger;
 import im.status.applet_installer_test.appletinstaller.Session;
+import im.status.hardwallet_lite_android.io.APDUCommand;
+import im.status.hardwallet_lite_android.io.APDUException;
+import im.status.hardwallet_lite_android.io.APDUResponse;
 
 public class InitializeUpdate {
     public static final int CLA = 0x80;

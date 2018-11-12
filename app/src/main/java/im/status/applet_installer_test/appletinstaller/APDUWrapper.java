@@ -1,6 +1,8 @@
 package im.status.applet_installer_test.appletinstaller;
 
 
+import im.status.hardwallet_lite_android.io.APDUCommand;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;

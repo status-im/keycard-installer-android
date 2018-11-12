@@ -1,8 +1,8 @@
 package im.status.applet_installer_test.appletinstaller.apducommands;
 
-import java.io.ByteArrayInputStream;
+import im.status.hardwallet_lite_android.io.APDUCommand;
+
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,9 +10,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.HexUtils;
 
 public class Load {
     public static final int CLA = 0x80;

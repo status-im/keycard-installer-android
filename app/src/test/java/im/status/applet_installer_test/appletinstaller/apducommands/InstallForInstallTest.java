@@ -4,8 +4,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import im.status.applet_installer_test.appletinstaller.APDUCommand;
-import im.status.applet_installer_test.appletinstaller.APDUCommandTest;
 import im.status.applet_installer_test.appletinstaller.HexUtils;
 import static org.junit.Assert.*;
 

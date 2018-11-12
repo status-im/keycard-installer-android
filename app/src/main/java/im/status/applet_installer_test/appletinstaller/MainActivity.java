@@ -5,11 +5,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import im.status.hardwallet_lite_android.io.CardManager;
+
 import java.security.Security;
 
 public class MainActivity extends AppCompatActivity implements UILogger {
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     private Button buttonInstall;
     private Button buttonInstallTest;
     private Button buttonPerfTest;
+    private ActionRunner actionRunner;
     private CardManager cardManager;
 
     @Override
@@ -34,8 +36,10 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         Logger.setUILogger(this);
 
         AssetManager assets = this.getAssets();
-        this.cardManager = new CardManager(nfcAdapter, assets, "wallet.cap");
-        this.cardManager.start();
+        this.actionRunner = new ActionRunner(assets, "wallet.cap");
+        this.cardManager = new CardManager();
+        this.cardManager.setOnCardConnectedListener(this.actionRunner);
+        cardManager.start();
 
         textViewScroll = (ScrollView) findViewById(R.id.textViewScroll);
 
@@ -46,21 +50,21 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         buttonInstall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestAction(CardManager.ACTION_INSTALL);
+                requestAction(ActionRunner.ACTION_INSTALL);
             }
         });
         buttonInstallTest = (Button) findViewById(R.id.buttonInstallTest);
         buttonInstallTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestAction(CardManager.ACTION_INSTALL_TEST);
+                requestAction(ActionRunner.ACTION_INSTALL_TEST);
             }
         });
         buttonPerfTest = (Button) findViewById(R.id.buttonPerfTest);
         buttonPerfTest.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                requestAction(CardManager.ACTION_PERFTEST);
+                requestAction(ActionRunner.ACTION_PERFTEST);
             }
         });
 
@@ -78,9 +82,9 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     }
 
     private void requestAction(int action) {
-        if (this.cardManager != null) {
+        if (this.actionRunner != null) {
             clearTextView();
-            this.cardManager.requestAction(action);
+            this.actionRunner.requestAction(action);
         }
     }
 
