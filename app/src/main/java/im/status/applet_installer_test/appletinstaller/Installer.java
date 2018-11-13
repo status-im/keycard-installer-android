@@ -92,7 +92,7 @@ public class Installer {
             this.send("load " + load.getCount() + "/35", loadCmd);
         }
 
-        InstallForInstall installNDEF = new InstallForInstall(packageAID, ndefAppletAID, ndefInstanceAID, new byte[0]);
+        InstallForInstall installNDEF = new InstallForInstall(packageAID, ndefAppletAID, ndefInstanceAID, HexUtils.hexStringToByteArray("0024d40f12616e64726f69642e636f6d3a706b67696d2e7374617475732e657468657265756d"));
         this.send("perform and make selectable (NDEF)", installNDEF.getCommand());
 
         InstallForInstall install = new InstallForInstall(packageAID, walletAID, walletAID, new byte[0]);
@@ -110,13 +110,6 @@ public class Installer {
         WalletAppletCommandSet cmdSet = new WalletAppletCommandSet(this.plainChannel);
         cmdSet.select().checkOK();
         cmdSet.init(secrets.getPin(), secrets.getPuk(), secrets.getPairingToken()).checkOK();
-
-        cmdSet.select().checkOK();
-        cmdSet.autoPair(secrets.getPairingPassword());
-        cmdSet.autoOpenSecureChannel();
-        cmdSet.verifyPIN(secrets.getPin()).checkOK();
-        cmdSet.setNDEF(HexUtils.hexStringToByteArray("0024d40f12616e64726f69642e636f6d3a706b67696d2e7374617475732e657468657265756d")).checkOK();
-        cmdSet.autoUnpair();
 
         Logger.i(String.format("PIN: %s\nPUK: %s\nPairing password: %s\nPairing token: %s", secrets.getPin(), secrets.getPuk(), secrets.getPairingPassword(), HexUtils.byteArrayToHexString(secrets.getPairingToken())));
     }
