@@ -1,4 +1,2 @@
-include ':app', ':hardwallet-lite-android'
-
-project(':hardwallet-lite-android').projectDir = new File(settingsDir, '../../hardwallet-lite-android/lib')
+include ':app'
 
