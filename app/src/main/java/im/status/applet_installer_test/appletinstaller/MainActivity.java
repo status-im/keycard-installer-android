@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         AssetManager assets = this.getAssets();
         this.actionRunner = new ActionRunner(assets, "wallet.cap");
         this.cardManager = new CardManager();
-        this.cardManager.setOnCardConnectedListener(this.actionRunner);
+        this.cardManager.setCardListener(this.actionRunner);
         cardManager.start();
 
         textViewScroll = (ScrollView) findViewById(R.id.textViewScroll);

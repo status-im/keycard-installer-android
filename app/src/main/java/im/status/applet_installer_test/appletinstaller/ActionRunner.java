@@ -6,13 +6,13 @@ import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
 import im.status.hardwallet_lite_android.io.APDUException;
 import im.status.hardwallet_lite_android.io.CardChannel;
-import im.status.hardwallet_lite_android.io.OnCardConnectedListener;
+import im.status.hardwallet_lite_android.io.CardListener;
 
 import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ActionRunner implements OnCardConnectedListener {
+public class ActionRunner implements CardListener {
     public final static int ACTION_NONE = 0;
     public final static int ACTION_INSTALL = 1;
     public final static int ACTION_INSTALL_TEST = 2;
@@ -89,6 +89,7 @@ public class ActionRunner implements OnCardConnectedListener {
 
     @Override
     public void onConnected(final CardChannel channel) {
+        Logger.i("card connected");
         if (this.requestedAction != ACTION_NONE) {
             Logger.i("waiting 2 seconds to start requested action");
             new Timer().schedule(new TimerTask() {
@@ -100,5 +101,10 @@ public class ActionRunner implements OnCardConnectedListener {
         } else {
             Logger.i("no action requested yet");
         }
+    }
+
+    @Override
+    public void onDisconnected() {
+        Logger.i("card disconnected");
     }
 }

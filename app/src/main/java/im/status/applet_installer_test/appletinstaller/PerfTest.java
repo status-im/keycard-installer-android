@@ -43,7 +43,9 @@ public class PerfTest {
   public void test() throws Exception {
     cmdSet = new WalletAppletCommandSet(cardChannel);
     cmdSet.select().checkOK();
-    cmdSet.autoPair(Secrets.testSecrets().getPairingToken());
+
+    String pairingPassword = "WalletAppletTest";
+    cmdSet.autoPair(cmdSet.pairingPasswordToSecret(pairingPassword));
     openSecureChannelTime = System.currentTimeMillis();
     cmdSet.autoOpenSecureChannel();
     openSecureChannelTime = System.currentTimeMillis() - openSecureChannelTime;
