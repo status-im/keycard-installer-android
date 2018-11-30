@@ -6,8 +6,8 @@ android {
         applicationId "im.status.applet_installer_test.appletinstaller"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 5
-        versionName "0.0.5"
+        versionCode 6
+        versionName "0.0.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -24,7 +24,7 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
     implementation 'com.madgag.spongycastle:core:1.58.0.0'
     implementation 'com.madgag.spongycastle:prov:1.58.0.0'
-    implementation 'com.github.status-im:hardwallet-lite-android:735ccd8'
+    implementation 'com.github.status-im:hardwallet-lite-android:c749e5a'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

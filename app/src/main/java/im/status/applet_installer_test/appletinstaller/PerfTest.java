@@ -4,12 +4,8 @@ import android.util.Log;
 
 import im.status.hardwallet_lite_android.io.CardChannel;
 import im.status.hardwallet_lite_android.wallet.WalletAppletCommandSet;
-import org.spongycastle.asn1.x9.X9ECParameters;
-import org.spongycastle.crypto.ec.CustomNamedCurves;
-import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.spec.ECParameterSpec;
-import org.spongycastle.math.ec.FixedPointUtil;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -23,18 +19,9 @@ public class PerfTest {
   private long loadKeysTime = 0;
   private long loginTime = 0;
   private long signTime = 0;
-  private long deriveKeyFromParent = 0;
   private long getStatusTime = 0;
-  private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
-  public static final ECDomainParameters CURVE;
 
-  static {
-    FixedPointUtil.precompute(CURVE_PARAMS.getG(), 12);
-    CURVE = new ECDomainParameters(CURVE_PARAMS.getCurve(), CURVE_PARAMS.getG(), CURVE_PARAMS.getN(), CURVE_PARAMS.getH());
-  }
-
-  // m/44'/60'/0'/0/0
-  static final byte[] BIP44_PATH = new byte[] { (byte) 0x80, 0x00, 0x00, 0x2c, (byte) 0x80, 0x00, 0x00, 0x3c, (byte) 0x80, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00, (byte) 0x00, 0x00, 0x00, 0x00};
+  static final String BIP44_WALLET_PATH = "m/44'/60'/0'/0/0";
 
   public PerfTest(CardChannel cardChannel) {
     this.cardChannel = cardChannel;
@@ -75,8 +62,7 @@ public class PerfTest {
     Logger.i("All following measurements are from application selection to the last needed APDU");
     Logger.i("GET STATUS: " + getStatusTime + "ms");
     Logger.i("Login: " + loginTime + "ms");
-    Logger.i("Transaction signature (after login): " + signTime + "ms");
-    Logger.i("Transaction signature (subsequent): " + (signTime - deriveKeyFromParent) + "ms");
+    Logger.i("Transaction signature: " + signTime + "ms");
   }
 
   private void getStatus() throws Exception {
@@ -92,10 +78,8 @@ public class PerfTest {
     cmdSet.select().checkOK();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
-    cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x00}, WalletAppletCommandSet.DERIVE_P1_SOURCE_PARENT).checkOK();
-    cmdSet.exportKey(WalletAppletCommandSet.EXPORT_KEY_P1_HIGH, false).checkOK();
-    cmdSet.deriveKey(new byte[] { (byte) 0xC0, 0x00, 0x00, 0x01}, WalletAppletCommandSet.DERIVE_P1_SOURCE_PARENT).checkOK();
-    cmdSet.exportKey(WalletAppletCommandSet.EXPORT_KEY_P1_HIGH, false).checkOK();
+    cmdSet.exportKey("m/43'/60'/1581'/0'/0",false, false).checkOK();
+    cmdSet.exportKey("m/43'/60'/1581'/1'/0",false, false).checkOK();
     loginTime = System.currentTimeMillis() - time;
   }
 
@@ -108,7 +92,7 @@ public class PerfTest {
     cmdSet.loadKey(keyPair, false, chainCode).checkOK();
 
     long time = System.currentTimeMillis();
-    cmdSet.deriveKey(BIP44_PATH, WalletAppletCommandSet.DERIVE_P1_SOURCE_CURRENT).checkOK();
+    cmdSet.deriveKey(BIP44_WALLET_PATH).checkOK();
     loadKeysTime = System.currentTimeMillis() - time;
   }
 
@@ -117,9 +101,6 @@ public class PerfTest {
     cmdSet.select().checkOK();
     cmdSet.autoOpenSecureChannel();
     cmdSet.verifyPIN("000000").checkOK();
-    deriveKeyFromParent = System.currentTimeMillis();
-    cmdSet.deriveKey(new byte[] { (byte) 0x00, 0x00, 0x00, 0x00}, WalletAppletCommandSet.DERIVE_P1_SOURCE_PARENT).checkOK();
-    deriveKeyFromParent = System.currentTimeMillis() - deriveKeyFromParent;
     cmdSet.sign("any32bytescanbeahashyouknowthat!".getBytes()).checkOK();
     signTime = System.currentTimeMillis() - time;
   }
