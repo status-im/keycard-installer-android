@@ -2,6 +2,7 @@ package im.status.applet_installer_test.appletinstaller;
 
 import android.support.annotation.NonNull;
 import android.util.Base64;
+import im.status.keycard.globalplatform.Crypto;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -16,34 +17,27 @@ public class Secrets {
     private String pin;
     private String puk;
     private String pairingPassword;
-    private byte[] pairingToken;
 
-    private static long PIN_BOUND = 999999L;
-    private static long PUK_BOUND = 999999999999L;
-
-    public Secrets(String pin, String puk, String pairingPassword, byte[] pairingToken) {
+    public Secrets(String pin, String puk, String pairingPassword) {
         this.pin = pin;
         this.puk = puk;
         this.pairingPassword = pairingPassword;
-        this.pairingToken = pairingToken;
     }
 
     @NonNull
     public static Secrets generate() throws NoSuchAlgorithmException, InvalidKeySpecException {
         String pairingPassword = randomToken(12);
-        byte[] pairingToken = generatePairingKey(pairingPassword.toCharArray());
-        long pinNumber = randomLong(PIN_BOUND);
-        long pukNumber = randomLong(PUK_BOUND);
+        long pinNumber = randomLong(Crypto.PIN_BOUND);
+        long pukNumber = randomLong(Crypto.PUK_BOUND);
         String pin = String.format("%06d", pinNumber);
         String puk = String.format("%012d", pukNumber);
 
-        return new Secrets(pin, puk, pairingPassword, pairingToken);
+        return new Secrets(pin, puk, pairingPassword);
     }
 
     public static Secrets testSecrets() throws NoSuchAlgorithmException, InvalidKeySpecException {
-        String pairingPassword = "WalletAppletTest";
-        byte[] pairingToken = generatePairingKey(pairingPassword.toCharArray());
-        return new Secrets("000000", "123456789012", pairingPassword, pairingToken);
+        String pairingPassword = "KeycardTest";
+        return new Secrets("000000", "123456789012", pairingPassword);
     }
 
     public String getPin() {
@@ -56,10 +50,6 @@ public class Secrets {
 
     public String getPairingPassword() {
         return pairingPassword;
-    }
-
-    public byte[] getPairingToken() {
-        return pairingToken;
     }
 
     public static byte[] randomBytes(int length) {
@@ -77,14 +67,5 @@ public class Secrets {
     public static long randomLong(long bound) {
         SecureRandom random = new SecureRandom();
         return Math.abs(random.nextLong()) % bound;
-    }
-
-    public static byte[] generatePairingKey(char[] pairing) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        String salt = "Status Hardware Wallet Lite";
-        PBEKeySpec spec = new PBEKeySpec(pairing, salt.getBytes(), 50000, 32*8);
-        SecretKey key = skf.generateSecret(spec);
-
-        return key.getEncoded();
     }
 }

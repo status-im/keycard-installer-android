@@ -5,12 +5,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import im.status.hardwallet_lite_android.io.CardManager;
+import im.status.keycard.io.CardManager;
 
 import java.security.Security;
 
@@ -37,7 +36,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         Logger.setUILogger(this);
 
         AssetManager assets = this.getAssets();
-        this.actionRunner = new ActionRunner(assets, "wallet.cap");
+        this.actionRunner = new ActionRunner(assets, "keycard.cap");
         this.cardManager = new CardManager();
         this.cardManager.setCardListener(this.actionRunner);
         cardManager.start();

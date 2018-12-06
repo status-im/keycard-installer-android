@@ -2,8 +2,8 @@ package im.status.applet_installer_test.appletinstaller;
 
 import android.util.Log;
 
-import im.status.hardwallet_lite_android.io.CardChannel;
-import im.status.hardwallet_lite_android.wallet.WalletAppletCommandSet;
+import im.status.keycard.io.CardChannel;
+import im.status.keycard.applet.KeycardCommandSet;
 import org.spongycastle.jce.ECNamedCurveTable;
 import org.spongycastle.jce.spec.ECParameterSpec;
 
@@ -13,7 +13,7 @@ import java.util.Random;
 
 public class PerfTest {
   private CardChannel cardChannel;
-  private WalletAppletCommandSet cmdSet;
+  private KeycardCommandSet cmdSet;
 
   private long openSecureChannelTime = 0;
   private long loadKeysTime = 0;
@@ -28,11 +28,10 @@ public class PerfTest {
   }
 
   public void test() throws Exception {
-    cmdSet = new WalletAppletCommandSet(cardChannel);
+    cmdSet = new KeycardCommandSet(cardChannel);
     cmdSet.select().checkOK();
 
-    String pairingPassword = "WalletAppletTest";
-    cmdSet.autoPair(cmdSet.pairingPasswordToSecret(pairingPassword));
+    cmdSet.autoPair(cmdSet.pairingPasswordToSecret(Secrets.testSecrets().getPairingPassword()));
     openSecureChannelTime = System.currentTimeMillis();
     cmdSet.autoOpenSecureChannel();
     openSecureChannelTime = System.currentTimeMillis() - openSecureChannelTime;
@@ -69,7 +68,7 @@ public class PerfTest {
     long time = System.currentTimeMillis();
     cmdSet.select().checkOK();
     cmdSet.autoOpenSecureChannel();
-    cmdSet.getStatus(WalletAppletCommandSet.GET_STATUS_P1_APPLICATION).checkOK();
+    cmdSet.getStatus(KeycardCommandSet.GET_STATUS_P1_APPLICATION).checkOK();
     getStatusTime = System.currentTimeMillis() - time;
   }
 
