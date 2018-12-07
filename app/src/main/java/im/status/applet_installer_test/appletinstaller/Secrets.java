@@ -4,14 +4,10 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 import im.status.keycard.globalplatform.Crypto;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
 
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import static android.util.Base64.NO_PADDING;
+import static im.status.keycard.globalplatform.Crypto.randomLong;
 
 public class Secrets {
     private String pin;
@@ -25,7 +21,7 @@ public class Secrets {
     }
 
     @NonNull
-    public static Secrets generate() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static Secrets generate() {
         String pairingPassword = randomToken(12);
         long pinNumber = randomLong(Crypto.PIN_BOUND);
         long pukNumber = randomLong(Crypto.PUK_BOUND);
@@ -35,7 +31,7 @@ public class Secrets {
         return new Secrets(pin, puk, pairingPassword);
     }
 
-    public static Secrets testSecrets() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static Secrets testSecrets() {
         String pairingPassword = "KeycardTest";
         return new Secrets("000000", "123456789012", pairingPassword);
     }
@@ -62,10 +58,5 @@ public class Secrets {
 
     public static String randomToken(int length) {
         return Base64.encodeToString(randomBytes(length), NO_PADDING);
-    }
-
-    public static long randomLong(long bound) {
-        SecureRandom random = new SecureRandom();
-        return Math.abs(random.nextLong()) % bound;
     }
 }
