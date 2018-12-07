@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import im.status.keycard.io.CardManager;
+import im.status.keycard.io.NFCCardManager;
 
 import java.security.Security;
 
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     private Button buttonInstallTest;
     private Button buttonPerfTest;
     private ActionRunner actionRunner;
-    private CardManager cardManager;
+    private NFCCardManager cardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
 
         AssetManager assets = this.getAssets();
         this.actionRunner = new ActionRunner(assets, "keycard.cap");
-        this.cardManager = new CardManager();
+        this.cardManager = new NFCCardManager();
         this.cardManager.setCardListener(this.actionRunner);
         cardManager.start();
 
