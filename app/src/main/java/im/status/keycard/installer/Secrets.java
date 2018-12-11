@@ -1,6 +1,5 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
-import android.support.annotation.NonNull;
 import android.util.Base64;
 import im.status.keycard.globalplatform.Crypto;
 
@@ -20,7 +19,6 @@ public class Secrets {
         this.pairingPassword = pairingPassword;
     }
 
-    @NonNull
     public static Secrets generate() {
         String pairingPassword = randomToken(12);
         long pinNumber = randomLong(Crypto.PIN_BOUND);

@@ -1,15 +1,11 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.util.Log;
 
 import im.status.keycard.io.CardChannel;
 import im.status.keycard.applet.KeycardCommandSet;
-import org.spongycastle.jce.ECNamedCurveTable;
-import org.spongycastle.jce.spec.ECParameterSpec;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class PerfTest {
   private CardChannel cardChannel;
@@ -83,12 +79,10 @@ public class PerfTest {
   }
 
   private void loadKeys() throws Exception {
-    KeyPairGenerator g = keypairGenerator();
-    KeyPair keyPair = g.generateKeyPair();
-    byte[] chainCode = new byte[32];
-    new Random().nextBytes(chainCode);
+    byte[] seed = new byte[64];
+    new SecureRandom().nextBytes(seed);
 
-    cmdSet.loadKey(keyPair, false, chainCode).checkOK();
+    cmdSet.loadKey(seed).checkOK();
 
     long time = System.currentTimeMillis();
     cmdSet.deriveKey(BIP44_WALLET_PATH).checkOK();
@@ -102,13 +96,5 @@ public class PerfTest {
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.sign("any32bytescanbeahashyouknowthat!".getBytes()).checkOK();
     signTime = System.currentTimeMillis() - time;
-  }
-
-  private KeyPairGenerator keypairGenerator() throws Exception {
-    ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
-    KeyPairGenerator g = KeyPairGenerator.getInstance("ECDH");
-    g.initialize(ecSpec);
-
-    return g;
   }
 }

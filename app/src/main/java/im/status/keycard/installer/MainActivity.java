@@ -1,4 +1,4 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
@@ -9,15 +9,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import im.status.keycard.io.NFCCardManager;
-
-import java.security.Security;
+import im.status.keycard.android.NFCCardManager;
 
 public class MainActivity extends AppCompatActivity implements UILogger {
-    static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
-    }
-
     private NfcAdapter nfcAdapter;
     private TextView textView;
     private ScrollView textViewScroll;

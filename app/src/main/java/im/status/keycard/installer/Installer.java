@@ -1,4 +1,4 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.content.res.AssetManager;
 import im.status.keycard.applet.KeycardCommandSet;
@@ -6,7 +6,7 @@ import im.status.keycard.globalplatform.GlobalPlatformCommandSet;
 import im.status.keycard.globalplatform.LoadCallback;
 import im.status.keycard.io.APDUException;
 import im.status.keycard.io.CardChannel;
-import org.spongycastle.util.encoders.Hex;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

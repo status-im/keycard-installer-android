@@ -1,4 +1,4 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.content.res.AssetManager;
 import im.status.keycard.io.APDUException;
