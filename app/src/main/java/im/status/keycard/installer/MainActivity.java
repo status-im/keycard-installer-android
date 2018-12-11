@@ -1,5 +1,6 @@
 package im.status.keycard.installer;
 
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import im.status.keycard.android.NFCCardManager;
+import de.cotech.sweetspot.ShowNfcSweetspotActivity;
 
 public class MainActivity extends AppCompatActivity implements UILogger {
     private NfcAdapter nfcAdapter;
@@ -19,6 +21,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     private Button buttonInstall;
     private Button buttonInstallTest;
     private Button buttonPerfTest;
+    private Button buttonNFCSpot;
     private ActionRunner actionRunner;
     private NFCCardManager cardManager;
 
@@ -59,6 +62,14 @@ public class MainActivity extends AppCompatActivity implements UILogger {
             @Override
             public void onClick(View view) {
                 requestAction(ActionRunner.ACTION_PERFTEST);
+            }
+        });
+        buttonNFCSpot = (Button) findViewById(R.id.buttonNFCSpot);
+        buttonNFCSpot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(MainActivity.this, ShowNfcSweetspotActivity.class);
+                startActivity(i);
             }
         });
 
