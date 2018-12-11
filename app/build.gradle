@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "im.status.applet_installer_test.appletinstaller"
+        applicationId "im.status.keycard_installer.installer"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 6

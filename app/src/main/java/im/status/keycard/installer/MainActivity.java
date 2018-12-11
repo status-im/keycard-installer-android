@@ -10,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+
+import de.cotech.sweetspot.NfcSweetspotData;
 import im.status.keycard.android.NFCCardManager;
 import de.cotech.sweetspot.ShowNfcSweetspotActivity;
 
@@ -72,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements UILogger {
                 startActivity(i);
             }
         });
+
+        if (NfcSweetspotData.hasSweetspotData()) {
+            buttonNFCSpot.setEnabled(true);
+        }
 
         //Logger.setUILevel(Log.INFO);
         //Logger.setLevel(Log.INFO);
