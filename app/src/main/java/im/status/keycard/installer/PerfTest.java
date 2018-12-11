@@ -1,19 +1,15 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.util.Log;
 
-import im.status.hardwallet_lite_android.io.CardChannel;
-import im.status.hardwallet_lite_android.wallet.WalletAppletCommandSet;
-import org.spongycastle.jce.ECNamedCurveTable;
-import org.spongycastle.jce.spec.ECParameterSpec;
+import im.status.keycard.io.CardChannel;
+import im.status.keycard.applet.KeycardCommandSet;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.util.Random;
+import java.security.SecureRandom;
 
 public class PerfTest {
   private CardChannel cardChannel;
-  private WalletAppletCommandSet cmdSet;
+  private KeycardCommandSet cmdSet;
 
   private long openSecureChannelTime = 0;
   private long loadKeysTime = 0;
@@ -28,11 +24,10 @@ public class PerfTest {
   }
 
   public void test() throws Exception {
-    cmdSet = new WalletAppletCommandSet(cardChannel);
+    cmdSet = new KeycardCommandSet(cardChannel);
     cmdSet.select().checkOK();
 
-    String pairingPassword = "WalletAppletTest";
-    cmdSet.autoPair(cmdSet.pairingPasswordToSecret(pairingPassword));
+    cmdSet.autoPair(cmdSet.pairingPasswordToSecret(Secrets.testSecrets().getPairingPassword()));
     openSecureChannelTime = System.currentTimeMillis();
     cmdSet.autoOpenSecureChannel();
     openSecureChannelTime = System.currentTimeMillis() - openSecureChannelTime;
@@ -69,7 +64,7 @@ public class PerfTest {
     long time = System.currentTimeMillis();
     cmdSet.select().checkOK();
     cmdSet.autoOpenSecureChannel();
-    cmdSet.getStatus(WalletAppletCommandSet.GET_STATUS_P1_APPLICATION).checkOK();
+    cmdSet.getStatus(KeycardCommandSet.GET_STATUS_P1_APPLICATION).checkOK();
     getStatusTime = System.currentTimeMillis() - time;
   }
 
@@ -84,12 +79,10 @@ public class PerfTest {
   }
 
   private void loadKeys() throws Exception {
-    KeyPairGenerator g = keypairGenerator();
-    KeyPair keyPair = g.generateKeyPair();
-    byte[] chainCode = new byte[32];
-    new Random().nextBytes(chainCode);
+    byte[] seed = new byte[64];
+    new SecureRandom().nextBytes(seed);
 
-    cmdSet.loadKey(keyPair, false, chainCode).checkOK();
+    cmdSet.loadKey(seed).checkOK();
 
     long time = System.currentTimeMillis();
     cmdSet.deriveKey(BIP44_WALLET_PATH).checkOK();
@@ -103,13 +96,5 @@ public class PerfTest {
     cmdSet.verifyPIN("000000").checkOK();
     cmdSet.sign("any32bytescanbeahashyouknowthat!".getBytes()).checkOK();
     signTime = System.currentTimeMillis() - time;
-  }
-
-  private KeyPairGenerator keypairGenerator() throws Exception {
-    ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec("secp256k1");
-    KeyPairGenerator g = KeyPairGenerator.getInstance("ECDH");
-    g.initialize(ecSpec);
-
-    return g;
   }
 }

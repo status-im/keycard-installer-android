@@ -1,12 +1,9 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.content.res.AssetManager;
-import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
-import im.status.hardwallet_lite_android.io.APDUException;
-import im.status.hardwallet_lite_android.io.CardChannel;
-import im.status.hardwallet_lite_android.io.CardListener;
+import im.status.keycard.io.APDUException;
+import im.status.keycard.io.CardChannel;
+import im.status.keycard.io.CardListener;
 
 import java.io.IOException;
 import java.util.Timer;

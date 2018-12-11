@@ -1,24 +1,17 @@
-package im.status.applet_installer_test.appletinstaller;
+package im.status.keycard.installer;
 
 import android.content.res.AssetManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.nfc.NfcAdapter;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import im.status.hardwallet_lite_android.io.CardManager;
-
-import java.security.Security;
+import im.status.keycard.android.NFCCardManager;
 
 public class MainActivity extends AppCompatActivity implements UILogger {
-    static {
-        Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
-    }
-
     private NfcAdapter nfcAdapter;
     private TextView textView;
     private ScrollView textViewScroll;
@@ -27,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements UILogger {
     private Button buttonInstallTest;
     private Button buttonPerfTest;
     private ActionRunner actionRunner;
-    private CardManager cardManager;
+    private NFCCardManager cardManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +30,8 @@ public class MainActivity extends AppCompatActivity implements UILogger {
         Logger.setUILogger(this);
 
         AssetManager assets = this.getAssets();
-        this.actionRunner = new ActionRunner(assets, "wallet.cap");
-        this.cardManager = new CardManager();
+        this.actionRunner = new ActionRunner(assets, "keycard.cap");
+        this.cardManager = new NFCCardManager();
         this.cardManager.setCardListener(this.actionRunner);
         cardManager.start();
 
