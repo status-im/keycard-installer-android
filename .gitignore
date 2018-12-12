@@ -1,6 +1,7 @@
 /local.properties
 /.idea
 /build
+*.iml
 
 # Built application files
 *.apk
