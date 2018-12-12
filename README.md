@@ -1,11 +1,11 @@
-# smartcard-cap-installer-test
+# Keycard Installer for Android
 
-This is an android application that implements the basic APDU commands and secure channel to be able to install our [hardware wallet cap](https://github.com/status-im/hardware-wallet)
-to a smartcard via NFC.
+This is an Android application to install the [keycard applet](https://github.com/status-im/status-keycard) to a 
+smartcard via NFC. The compiled cap file of the applet is bundled in the application. Currently, version 2.0rc1 of the
+applet is installed.
 
-The Purpose of it is to be able to start testing smartcards and NFC connection with different cards and readers. 
-This can help with UX/UI design while we implement the final solution in `status-react` and `status-go`. 
+If you work with the Status Keycard this is a quick utility to reinstall the applet.
 
-[Download APK](https://github.com/status-im/smartcard-cap-installer-test/releases/download/0.0.1/app-debug.apk)
+[Download APK](https://github.com/status-im/keycard-installer-android/releases/download/v0.0.7/smartcard-cap-installer-debug.apk)
 
 ![https://github.com/status-im/smartcard-cap-installer-test/blob/master/docs/demo.gif?raw=true](https://github.com/status-im/smartcard-cap-installer-test/blob/master/docs/demo.gif?raw=true)
