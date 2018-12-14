@@ -6,8 +6,8 @@ android {
         applicationId "im.status.keycard_installer.installer"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 7
-        versionName "0.0.7"
+        versionCode 200
+        versionName "2.0.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -22,7 +22,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support.constraint:constraint-layout:1.1.2'
-    implementation 'com.github.status-im.status-keycard-java:android:2.0rc1'
+    implementation 'com.github.status-im.status-keycard-java:android:2.0.0'
     implementation 'de.cotech:nfc-sweetspot:1.1'
 
     testImplementation 'junit:junit:4.12'
