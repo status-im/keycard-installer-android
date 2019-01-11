@@ -55,14 +55,16 @@ public class Installer {
         Logger.i("installing Keycard applet...");
         cmdSet.installKeycardApplet().checkOK();
 
-        this.personalizeApplet();
+        if (testSecrets) {
+            this.personalizeApplet();
+        }
 
         long duration = System.currentTimeMillis() - startTime;
         Logger.i(String.format("\n\ninstallation completed in %d seconds", duration / 1000));
     }
 
     private void personalizeApplet() throws NoSuchAlgorithmException, InvalidKeySpecException, APDUException, IOException {
-        Secrets secrets = testSecrets ? Secrets.testSecrets() : Secrets.generate();
+        Secrets secrets = Secrets.testSecrets();
 
         KeycardCommandSet cmdSet = new KeycardCommandSet(this.plainChannel);
         cmdSet.select().checkOK();

@@ -27,7 +27,7 @@
             android:id="@+id/buttonInstall"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Install Secure"/>
+            android:text="Install w/o INIT"/>
 
     <Button
             android:id="@+id/buttonInstallTest"
