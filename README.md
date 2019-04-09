@@ -6,6 +6,6 @@ applet is installed.
 
 If you work with the Status Keycard this is a quick utility to reinstall the applet.
 
-[Download APK](https://github.com/status-im/keycard-installer-android/releases/download/2.0.0/keycard-installer-debug.apk)
+Download the APK from the [releases page](https://github.com/status-im/keycard-installer-android/releases/)
 
 ![https://github.com/status-im/keycard-installer-android/blob/master/docs/demo.gif?raw=true](https://github.com/status-im/keycard-installer-android/blob/master/docs/demo.gif?raw=true)
